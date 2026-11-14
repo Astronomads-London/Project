@@ -1,3 +1,4 @@
+#Unfinished
 class Mentalhealth:
     """Scores one person's answers and turns the score into a concern level.
 
