@@ -11,3 +11,6 @@ def auth_login(username, stored_username, password, stored_hash):
             return False
     else:
         return False
+
+def hash_password(raw_password):
+    return ph.hash(raw_password)
