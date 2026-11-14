@@ -1,5 +1,5 @@
 from flask import Blueprint, request, redirect, session
-from auth import auth_login
+from auth import auth_login, hash_password
 import db
 api_bp = Blueprint("api", __name__)
 
@@ -36,9 +36,18 @@ def register():
     if refcode != TEMP_REFCODE:
         return redirect("/register?error=invalid_refcode")
 
-    success = db.new_user(username, password, age, height, mass, sex)
+    if db.user_exists(username):
+        return redirect("/register?error=username_exists")
+
+    hashed_password = hash_password(password)
+    success = db.new_user(username, hashed_password, age, height, mass, sex)
     if success:
         session["username"] = username
         return redirect("/dashboard")
     else:
         return redirect("/register?error=database_error")
+
+@api_bp.route("/logout", methods=["GET"])
+def logout():
+    session.pop("username", None)
+    return redirect("/")
