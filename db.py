@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 
@@ -53,3 +54,100 @@ def return_user_hash(username: str) -> str:
         return user["password_hash"]
     return None
 
+def new_data_entry(username: str, category: str, data: dict) -> bool:
+    if not user_exists(username):
+        raise ValueError("User does not exist")
+
+    match category:
+        case "daily_exercise":
+            entry = {
+                **data,
+                "date": datetime.now().strftime("%d%m%Y"),
+            }
+            users_collection.update_one(
+                {"username": username},
+                {"$push": {"daily_exercise": entry}}
+            )
+            return True
+        case "water_intake":
+            entry = {
+                **data,
+                "date": datetime.now().strftime("%d%m%Y"),
+            }
+            users_collection.update_one(
+                {"username": username},
+                {"$push": {"water_intake": entry}}
+            )
+            return True
+        case "body_temperature":
+            entry = {
+                **data,
+                "date": datetime.now().strftime("%d%m%Y"),
+            }
+            users_collection.update_one(
+                {"username": username},
+                {"$push": {"body_temperature": entry}}
+            )
+            return True
+        case "sleep_time":
+            entry = {
+                **data,
+                "date": datetime.now().strftime("%d%m%Y"),
+            }
+            users_collection.update_one(
+                {"username": username},
+                {"$push": {"sleep_time": entry}}
+            )
+            return True
+        case "blood_pressure":
+            entry = {
+                **data,
+                "date": datetime.now().strftime("%d%m%Y"),
+            }
+            users_collection.update_one(
+                {"username": username},
+                {"$push": {"blood_pressure": entry}}
+            )
+            return True
+        case "mood_checkin":
+            entry = {
+                **data,
+                "date": datetime.now().strftime("%d%m%Y"),
+            }
+            users_collection.update_one(
+                {"username": username},
+                {"$push": {"mood_checkin": entry}}
+            )
+            return True
+        case "blood_oxygen":
+            entry = {
+                **data,
+                "date": datetime.now().strftime("%d%m%Y"),
+            }
+            users_collection.update_one(
+                {"username": username},
+                {"$push": {"blood_oxygen": entry}}
+            )
+            return True
+        case "blood_glucose":
+            entry = {
+                **data,
+                "date": datetime.now().strftime("%d%m%Y"),
+            }
+            users_collection.update_one(
+                {"username": username},
+                {"$push": {"blood_glucose": entry}}
+            )
+            return True
+        case "resting_heart_rate":
+            entry = {
+                **data,
+                "date": datetime.now().strftime("%d%m%Y"),
+            }
+            users_collection.update_one(
+                {"username": username},
+                {"$push": {"resting_heart_rate": entry}}
+            )
+            return True
+        case _:
+            raise ValueError("Invalid category")
