@@ -31,10 +31,21 @@ users_collection = database["Users"]
 def user_exists(username: str) -> bool:
     return users_collection.find_one({"username": username}) is not None
 
-def new_user(username: str, password_hash: str):
-    user = {"username": username, "password_hash": password_hash}
-    users_collection.insert_one(user)
-    return user
+def new_user(username: str, password_hash: str, age: int, height: float, mass: float, sex: str):
+    try:
+        user = {
+            "username": username,
+            "password_hash": password_hash,
+            "age": age,
+            "height": height,
+            "mass": mass,
+            "sex": sex
+        }
+        users_collection.insert_one(user)
+        return True
+    except Exception as e:
+        print(f"❌ Error occurred while creating new user: {e}")
+        return False
 
 def return_user_hash(username: str) -> str:
     user = users_collection.find_one({"username": username})

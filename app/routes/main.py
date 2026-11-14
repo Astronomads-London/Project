@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, render_template, session
+from flask import Blueprint, redirect, render_template, session, request
 
 main_bp = Blueprint("main", __name__)
 
@@ -7,14 +7,21 @@ main_bp = Blueprint("main", __name__)
 def index():
     return "Hello World!"
 
-@main_bp.route("/login", methods=["GET", "POST"])
+@main_bp.route("/login", methods=["GET"])
 def login():
-    return render_template("login.html")
+    if "username" in session:
+        return redirect("/dashboard")
+    else:
+        return render_template("login.html", error=request.args.get("error"))
 
 
 @main_bp.route("/register", methods=["GET", "POST"])
 def register():
-    return render_template("register.html")
+    if "username" in session:
+        return redirect("/dashboard")
+    else:
+        return render_template("register.html", error=request.args.get("error"))
+
 
 @main_bp.route("/dashboard", methods=["GET"])
 def dashboard():
