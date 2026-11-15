@@ -1,7 +1,25 @@
 from flask import Blueprint, redirect, render_template, session, request
 from datetime import datetime, timedelta, timezone
-from app.utils.birthday import birthday_limits
+from app.utils.birthday import birthday_error, birthday_limits
+from app.utils.bloodpressure import (
+    BLOOD_PRESSURE_ERROR,
+    DIASTOLIC_RANGE,
+    MIN_PULSE_PRESSURE,
+    SYSTOLIC_RANGE,
+)
 from app.utils.greeting import get_gmt_greeting
+from app.utils.validation import (
+    CONVERSION_LIMITS,
+    DAY_TOTAL_ERROR,
+    MINUTES_PER_DAY,
+    PASSWORD_MAX_LENGTH,
+    PASSWORD_MIN_LENGTH,
+    SETTINGS_NUMBER_FIELDS,
+    TODAY_DATA_FIELDS,
+    USERNAME_MAX_LENGTH,
+    USERNAME_MIN_LENGTH,
+    launch_date_limits,
+)
 import db
 
 main_bp = Blueprint("main", __name__)
@@ -30,6 +48,9 @@ def register():
             error=request.args.get("error"),
             birthday_min=birthday_min.isoformat(),
             birthday_max=birthday_max.isoformat(),
+            birthday_error=birthday_error(),
+            username_length=(USERNAME_MIN_LENGTH, USERNAME_MAX_LENGTH),
+            password_length=(PASSWORD_MIN_LENGTH, PASSWORD_MAX_LENGTH),
         )
 
 
@@ -117,6 +138,13 @@ def today_data():
         today_gmt=datetime.now(timezone.utc).date().isoformat(),
         saved=request.args.get("saved") == "true",
         error=request.args.get("error"),
+        systolic_range=SYSTOLIC_RANGE,
+        diastolic_range=DIASTOLIC_RANGE,
+        min_pulse_pressure=MIN_PULSE_PRESSURE,
+        blood_pressure_error=BLOOD_PRESSURE_ERROR,
+        limits=TODAY_DATA_FIELDS,
+        minutes_per_day=MINUTES_PER_DAY,
+        day_total_error=DAY_TOTAL_ERROR,
     )
 
 
@@ -127,6 +155,7 @@ def settings():
 
     user = db.get_user(session["username"]) or {}
     birthday_min, birthday_max = birthday_limits()
+    launch_min, launch_max = launch_date_limits()
 
     return render_template(
         "settings.html",
@@ -135,6 +164,9 @@ def settings():
         today_gmt=datetime.now(timezone.utc).date().isoformat(),
         birthday_min=birthday_min.isoformat(),
         birthday_max=birthday_max.isoformat(),
+        launch_min=launch_min.isoformat(),
+        launch_max=launch_max.isoformat(),
+        limits=SETTINGS_NUMBER_FIELDS,
     )
 
 
@@ -154,4 +186,4 @@ def privacy_redirect():
 @main_bp.route("/unit_conversion", methods=["GET"])
 @main_bp.route("/conversion", methods=["GET"])
 def unitconversion():
-    return render_template("unitconversion.html")
+    return render_template("unitconversion.html", limits=CONVERSION_LIMITS)

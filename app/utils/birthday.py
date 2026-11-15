@@ -1,21 +1,35 @@
 import re
 from datetime import date
 
-# Oldest age a profile may claim. Birthdays must fall between this many years
-# ago and today.
+# Account holders must be at least MIN_AGE_YEARS old and may claim to be at
+# most MAX_AGE_YEARS old, so birthdays fall between those two points.
+MIN_AGE_YEARS = 18
 MAX_AGE_YEARS = 120
 
 _ISO_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 
 
+def years_before(day, years):
+    try:
+        return day.replace(year=day.year - years)
+    except ValueError:  # 29 February in a non-leap target year
+        return day.replace(year=day.year - years, day=28)
+
+
 def birthday_limits(today=None):
     """Return the (earliest, latest) birthday accepted today."""
     today = today or date.today()
-    try:
-        earliest = today.replace(year=today.year - MAX_AGE_YEARS)
-    except ValueError:  # 29 February in a non-leap target year
-        earliest = today.replace(year=today.year - MAX_AGE_YEARS, day=28)
-    return earliest, today
+    return years_before(today, MAX_AGE_YEARS), years_before(today, MIN_AGE_YEARS)
+
+
+def birthday_error():
+    """Return the message shown when a birthday is outside birthday_limits()."""
+    earliest, latest = birthday_limits()
+    # Kept short: the sign-up card only has room for one line of error text.
+    return (
+        f"Enter a birthday from {earliest.isoformat()} to {latest.isoformat()} "
+        f"(age {MIN_AGE_YEARS} or over)."
+    )
 
 
 def parse_birthday(raw):

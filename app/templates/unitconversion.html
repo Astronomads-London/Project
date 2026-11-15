@@ -20,11 +20,11 @@
       <form class="conversion-form" data-conversion="height">
         <label>
           <span>Feet</span>
-          <input type="number" name="feet" min="0" step="any" inputmode="decimal" required>
+          <input type="number" name="feet" min="{{ limits.feet[0] }}" max="{{ limits.feet[1] }}" step="any" inputmode="decimal" required>
         </label>
         <label>
           <span>Inches</span>
-          <input type="number" name="inches" min="0" step="any" value="0" inputmode="decimal" required>
+          <input type="number" name="inches" min="{{ limits.inches[0] }}" max="{{ limits.inches[1] }}" step="any" value="0" inputmode="decimal" required>
         </label>
         <button class="btn btn--sm" type="submit">CONVERT TO CM</button>
         <p class="conversion-result" aria-live="polite"></p>
@@ -37,7 +37,7 @@
       <form class="conversion-form" data-conversion="weight">
         <label>
           <span>Pounds</span>
-          <input type="number" name="pounds" min="0" step="any" inputmode="decimal" required>
+          <input type="number" name="pounds" min="{{ limits.pounds[0] }}" max="{{ limits.pounds[1] }}" step="any" inputmode="decimal" required>
         </label>
         <button class="btn btn--sm" type="submit">CONVERT TO KG</button>
         <p class="conversion-result" aria-live="polite"></p>
