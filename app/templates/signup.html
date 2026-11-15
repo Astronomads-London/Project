@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up — 11:56{% endblock %}
+{% block body_class %}auth{% endblock %}
+{% block page_class %}page--auth{% endblock %}
+
+{% block content %}
+<div class="auth__bg" aria-hidden="true">
+  <img src="{{ url_for('static', filename='assets/starfield.jpg') }}" alt="">
+</div>
+
+<main class="auth-card auth-card--signup">
+  <h1 class="auth-card__title">Sign Up</h1>
+
+  <form action="{{ url_for('api.register') }}" method="post">
+    <label class="field" style="--x:34; --y:91.97; --w:511.145">
+      <span class="field__label">USERNAME</span>
+      <input class="field__input" type="text" name="username" placeholder="Astronaut39..." autocomplete="username" required>
+    </label>
+
+    <label class="field" style="--x:34; --y:193.97; --w:511.145">
+      <span class="field__label">PASSWORD</span>
+      <input class="field__input" type="password" name="password" autocomplete="new-password" required>
+    </label>
+
+    <label class="field field--sm" style="--x:34; --y:296.97; --w:248">
+      <span class="field__label">SEX</span>
+      <select class="field__input field__select" name="sex">
+        <option value="" selected disabled>Select</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+      </select>
+    </label>
+
+    <label class="field field--sm" style="--x:297; --y:295.97; --w:248">
+      <span class="field__label">BIRTHDAY</span>
+      <input class="field__input field__input--date" type="date" name="birthday" autocomplete="bday" required>
+    </label>
+
+    <label class="field field--sm" style="--x:33; --y:396.97; --w:248">
+      <span class="field__label">HEIGHT</span>
+      <input class="field__input" type="number" name="height" placeholder="Centimetres" min="0" inputmode="decimal" step="any">
+    </label>
+
+    <label class="field field--sm" style="--x:297; --y:396.97; --w:248">
+      <span class="field__label">BODY MASS</span>
+      <input class="field__input" type="number" name="mass" placeholder="Kilograms" min="0" inputmode="decimal" step="any">
+    </label>
+
+    <label class="field" style="--x:34; --y:497; --w:511.145">
+      <span class="field__label">INVITE CODE</span>
+      <input class="field__input" type="password" name="invite_code" autocomplete="off" required>
+    </label>
+
+    {% if error %}
+      <p class="auth-card__error" style="position: absolute; top: calc(588 * var(--u)); left: 0; width: 100%; text-align: center; color: #ff6b6b; margin: 0; font-family: 'Inter', sans-serif; font-size: calc(14 * var(--u));">{{ error }}</p>
+    {% endif %}
+
+    <button class="btn btn--sm" type="submit" style="--x:140; --y:610; --w:271; --h:53.454">SIGN UP NOW</button>
+  </form>
+  <a class="auth-card__link auth-card__link--login" href="{{ url_for('main.login') }}">Already registered? Log in</a>
+</main>
+{% endblock %}

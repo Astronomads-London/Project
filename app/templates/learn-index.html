@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Learn — 11:56{% endblock %}
+{% block body_class %}learn{% endblock %}
+{% block page_class %}page--learn{% endblock %}
+
+{% block content %}
+<div class="auth__bg" aria-hidden="true">
+  <img src="{{ url_for('static', filename='assets/starfield.jpg') }}" alt="">
+</div>
+
+<main class="learn-content learn-index">
+  <h1>Learn</h1>
+  <label class="learn-search">
+    <span class="sr-only">Search learning topics</span>
+    <input id="learn-search" type="search" placeholder="Search topics..." autocomplete="off">
+  </label>
+
+  <ul class="learn-list" id="learn-list">
+    {% for page in pages %}
+      <li class="learn-list__item" data-search="{{ page.search_text|lower }}">
+        <a href="{{ url_for('learn.learn_page', slug=page.slug) }}">{{ page.title }}</a>
+      </li>
+    {% else %}
+      <li class="learn-list__empty">No learning content is available yet.</li>
+    {% endfor %}
+  </ul>
+  {% if pages %}
+    <p class="learn-list__empty" id="learn-no-results" hidden>No topics match your search.</p>
+  {% endif %}
+</main>
+
+{% if pages %}
+<script>
+  const searchInput = document.getElementById("learn-search");
+  const topics = [...document.querySelectorAll(".learn-list__item")];
+  const noResults = document.getElementById("learn-no-results");
+
+  searchInput.addEventListener("input", () => {
+    const query = searchInput.value.trim().toLowerCase();
+    let visibleCount = 0;
+
+    topics.forEach((topic) => {
+      const matches = topic.dataset.search.includes(query);
+      topic.hidden = !matches;
+      if (matches) visibleCount += 1;
+    });
+
+    noResults.hidden = visibleCount > 0;
+  });
+</script>
+{% endif %}
+{% endblock %}

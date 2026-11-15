@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}Settings — 11:56{% endblock %}
+{% block body_class %}settings{% endblock %}
+{% block page_class %}page--settings{% endblock %}
+
+{% block content %}
+<div class="auth__bg" aria-hidden="true">
+  <img src="{{ url_for('static', filename='assets/starfield.jpg') }}" alt="">
+</div>
+
+<main class="settings-content">
+  <header class="settings-header">
+    <p class="settings-eyebrow">CREW PROFILE · <span class="settings-badge">LOCAL CONFIGURATION</span></p>
+    <h1>Settings</h1>
+    <p class="settings-intro">Configure personal biometric details, daily health targets, and mission control preferences in standard SI units.</p>
+  </header>
+
+  <form id="settings-form" class="settings-form" action="{{ url_for('main.settings') }}" method="post">
+    <div class="settings-grid">
+      <!-- Biometric & Personal Profile Section -->
+      <section class="settings-card" aria-labelledby="biometrics-heading">
+        <h2 id="biometrics-heading">Biometric Profile</h2>
+        <p class="settings-card__desc">Update your physiological metrics used for health and telemetry tracking (SI units).</p>
+
+        <div class="settings-fields">
+          <label class="settings-field">
+            <span class="settings-field__label">SEX</span>
+            <select class="settings-field__input" name="sex" id="setting-sex" required>
+              <option value="" disabled>Select sex</option>
+              <option value="Male" selected>Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+              <option value="Prefer not to say">Prefer not to say</option>
+            </select>
+          </label>
+
+          <label class="settings-field">
+            <span class="settings-field__label">BIRTHDAY</span>
+            <input class="settings-field__input" type="date" name="birthday" id="setting-birthday" value="1995-04-12" required>
+          </label>
+
+          <label class="settings-field">
+            <span class="settings-field__label">HEIGHT (CM)</span>
+            <input class="settings-field__input" type="number" name="height" id="setting-height" placeholder="e.g. 175" min="0" step="any" value="175" required>
+          </label>
+
+          <label class="settings-field">
+            <span class="settings-field__label">BODY MASS (KG)</span>
+            <input class="settings-field__input" type="number" name="mass" id="setting-mass" placeholder="e.g. 70" min="0" step="any" value="70" required>
+          </label>
+        </div>
+      </section>
+
+      <!-- Health Targets Section -->
+      <section class="settings-card" aria-labelledby="targets-heading">
+        <h2 id="targets-heading">Health Targets</h2>
+        <p class="settings-card__desc">Set daily hydration goals, physical activity levels, and rest targets.</p>
+
+        <div class="settings-fields">
+          <label class="settings-field">
+            <span class="settings-field__label">DAILY WATER TARGET (ML)</span>
+            <input class="settings-field__input" type="number" name="water_target" id="setting-water" placeholder="e.g. 2500" min="0" step="50" value="2500" required>
+          </label>
+
+          <label class="settings-field">
+            <span class="settings-field__label">DAILY EXERCISE TARGET (MINUTES)</span>
+            <input class="settings-field__input" type="number" name="exercise_target" id="setting-exercise" placeholder="e.g. 60" min="0" step="5" value="60" required>
+          </label>
+
+          <label class="settings-field">
+            <span class="settings-field__label">DAILY SLEEP TARGET (HOURS)</span>
+            <input class="settings-field__input" type="number" name="sleep_target" id="setting-sleep" placeholder="e.g. 8.0" min="0" max="24" step="0.5" value="8.0" required>
+          </label>
+
+          <label class="settings-field">
+            <span class="settings-field__label">HYDRATION REMINDERS</span>
+            <select class="settings-field__input" name="hydration_reminders" id="setting-reminders">
+              <option value="2h" selected>Every 2 hours during active mission</option>
+              <option value="1h">Every hour during active mission</option>
+              <option value="disabled">Disabled</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <!-- Mission Control Settings Section -->
+      <section class="settings-card settings-card--full" aria-labelledby="mission-control-heading">
+        <h2 id="mission-control-heading">Mission Control Settings</h2>
+        <p class="settings-card__desc">Configure mission parameters, orbital environment, launch timeline, and duration.</p>
+
+        <div class="settings-fields settings-fields--two-col">
+          <label class="settings-field">
+            <span class="settings-field__label">ENVIRONMENT</span>
+            <select class="settings-field__input" name="environment" id="setting-environment" required>
+              <option value="iss" selected>ISS (International Space Station)</option>
+              <option value="mars">Mars Base</option>
+              <option value="moon">Lunar Outpost</option>
+            </select>
+          </label>
+
+          <label class="settings-field">
+            <span class="settings-field__label">LAUNCH DATE</span>
+            <input class="settings-field__input" type="date" name="launch_date" id="setting-launch-date" value="{{ today_gmt }}" required>
+          </label>
+
+          <label class="settings-field">
+            <span class="settings-field__label">MISSION LENGTH (DAYS)</span>
+            <input class="settings-field__input" type="number" name="mission_length" id="setting-mission-length" placeholder="e.g. 180" min="1" max="2000" value="180" required>
+          </label>
+        </div>
+      </section>
+    </div>
+
+    <div class="settings-actions">
+      <button class="btn btn--sm settings-save-btn" type="submit">SAVE SETTINGS</button>
+      <div id="settings-status" class="settings-status" role="status" aria-live="polite"></div>
+    </div>
+  </form>
+</main>
+
+<script>
+  (function() {
+    const form = document.getElementById("settings-form");
+    const statusBox = document.getElementById("settings-status");
+    const STORAGE_KEY = "astronomads_user_settings";
+
+    // Load saved settings from localStorage if available
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const data = JSON.parse(saved);
+        if (data.mission_start && !data.launch_date) {
+          data.launch_date = data.mission_start;
+        }
+        Object.entries(data).forEach(([key, val]) => {
+          const field = form.elements[key];
+          if (field) {
+            field.value = val;
+          }
+        });
+      }
+    } catch (e) {
+      // Local storage fallback
+    }
+
+    form.addEventListener("submit", function(event) {
+      event.preventDefault();
+
+      const formData = new FormData(form);
+      const settingsObj = Object.fromEntries(formData.entries());
+      settingsObj.mission_start = settingsObj.launch_date; // Keep alias for backward compatibility
+
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(settingsObj));
+      } catch (e) {}
+
+      statusBox.textContent = "Settings successfully updated.";
+      statusBox.className = "settings-status settings-status--success";
+
+      setTimeout(function() {
+        statusBox.style.opacity = "0";
+        setTimeout(function() {
+          statusBox.textContent = "";
+          statusBox.style.opacity = "1";
+          statusBox.className = "settings-status";
+        }, 500);
+      }, 4000);
+    });
+  })();
+</script>
+{% endblock %}
