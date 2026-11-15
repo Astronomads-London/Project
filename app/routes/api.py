@@ -5,6 +5,7 @@ from datetime import date, datetime, timezone
 from flask import Blueprint, current_app, request, redirect, session, jsonify
 from auth import auth_login, hash_password
 from app.utils.unitconversion import height_to_cm, pounds_to_kg
+from app.utils.uring import urine
 import db
 
 
@@ -22,6 +23,70 @@ TODAY_DATA_FIELDS = {
     "exercise": (0, 1440),
 }
 PVT_OUTCOMES = {"commission", "false_start", "response", "lapse", "omission", "truncated"}
+URINE_FIELDS = ("ca", "ntx", "ctx1", "pyridinoline")
+URINE_FIELD_LABELS = {
+    "ca": "Calcium (CA)",
+    "ntx": "N-telopeptide (NTX)",
+    "ctx1": "C-telopeptide-1 (CTX1)",
+    "pyridinoline": "Pyridinoline",
+}
+
+
+@api_bp.route("/urine-check", methods=["POST"])
+def urine_check():
+    username = session.get("username")
+    if not username:
+        return jsonify(error="Not authenticated."), 401
+    if request.content_length is not None and request.content_length > 4096:
+        return jsonify(error="Urine check payload is too large."), 413
+
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify(error="Provide urine check values as a JSON object."), 400
+
+    user = db.get_user(username)
+    if not user:
+        return jsonify(error="User not found."), 404
+
+    sex = str(user.get("sex", "")).strip().lower()
+    if sex in {"male", "m"}:
+        sex_code = "M"
+        period = False
+    elif sex in {"female", "f"}:
+        sex_code = "F"
+        period = data.get("period")
+        if not isinstance(period, bool):
+            return jsonify(error="Select whether you are currently on your period."), 400
+    else:
+        return jsonify(error="A valid sex is required in your profile to run this check."), 400
+
+    values = {}
+    for field in URINE_FIELDS:
+        value = data.get(field)
+        if (
+            not isinstance(value, (int, float))
+            or isinstance(value, bool)
+            or value < 0
+            or value > 1_000_000
+            or not math.isfinite(value)
+        ):
+            return jsonify(error=f"Enter a valid non-negative {field.upper()} value."), 400
+        values[field] = value
+
+    results = urine(
+        sex_code,
+        values["ca"],
+        values["ntx"],
+        values["ctx1"],
+        values["pyridinoline"],
+        period,
+    )
+    failed_tests = [
+        URINE_FIELD_LABELS[field]
+        for field, passed in zip(URINE_FIELDS, results)
+        if not passed
+    ]
+    return jsonify(success=True, passed=not failed_tests, failed_tests=failed_tests)
 
 
 def _percentile(values, percentile):
