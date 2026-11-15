@@ -3,7 +3,7 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Optional
 from dotenv import load_dotenv
-from pymongo.mongo_client import MongoClient
+from pymongo import MongoClient
 from pymongo.server_api import ServerApi
 from pymongo import ASCENDING
 
