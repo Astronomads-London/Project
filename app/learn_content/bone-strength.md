@@ -6,20 +6,35 @@ Published: 14th November 2026
 
 ----
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ullamcorper lectus semper turpis pellentesque, ac interdum dui congue. Nullam luctus nibh at orci aliquet euismod. Nunc porttitor vulputate venenatis. Donec ac tempus nisl. Maecenas scelerisque non est sit amet cursus. Proin sit amet dui tortor. Morbi dictum at sapien ac euismod. Praesent dui neque, pellentesque vel lobortis et, pulvinar bibendum mauris. Sed sodales egestas arcu mollis tristique. Nunc ut fermentum eros. Proin malesuada volutpat turpis quis sollicitudin. Pellentesque feugiat mauris sed metus lacinia porttitor. Sed turpis ante, cursus viverra sem at, blandit dignissim urna. Ut cursus dictum odio, vitae venenatis orci efficitur ut. Aenean a sem augue. Phasellus ac ante ut mi facilisis semper rhoncus eu mauris.
+Osteoclasts dissolve old and damaged bone tissue while osteoblasts create.
+The conditions of space (altered gravity, radiation and microgravity) cause uncontrollable bone remodeling and rapid bone loss (caused by bone resorption from osteoclast activity). This results in bones becoming weaker post mission. As a result, astronauts are at higher risk from suffering from bone fractures from activities that would not normally cause injury. Astronauts lose roughly 1 to 1.5% of bone density per month in the hip and spine (in  microgravity there is not as much load on the hip and spine).
+
 
 ![Image of a bone](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqgXd4pZUKkxEPozU5TrrzqUJ2CbW7dhRlATA0prs3Zu1cgq5yb_68EG6h&s=10)
-*Image Description, Source*
+*Inner structure of a femur, Source*
 
-Etiam feugiat aliquam felis, eu faucibus nisl maximus sit amet. Pellentesque vel venenatis augue, et sodales arcu. Quisque aliquam tempus vehicula. Donec varius volutpat orci nec feugiat. Suspendisse eget rutrum est, et mollis ex. Ut et velit non odio interdum feugiat ut a ligula. Mauris eu posuere dui. Mauris ultricies ex lorem, eu fermentum augue porta nec. Pellentesque laoreet dolor nec interdum gravida. Fusce sed lacinia felis, in fringilla ligula. Curabitur vel sem faucibus, euismod massa id, placerat nunc.
+Precautions:
+Dual energy X-ray absorptiometry bone scans are done after spaceflight and before spaceflight to measure mineral density in the bones.
 
-> Fun Fact: 
+Daily Exercise is mandated for astronauts for 2 hrs per day. A special exercise tool called the ARED(Advanced Resistive Exercise Device) is used, this device allows weightlifting to be mimicked in microgravity. 
 
-Cras rhoncus placerat neque non bibendum. Nunc porta odio sed dolor commodo feugiat. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum ut felis ut arcu vulputate finibus. Nunc ultrices, odio et tempus elementum, nisl sem pretium sem, at venenatis ipsum tortor sed risus. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Praesent a erat commodo, hendrerit felis ac, ultricies ipsum. Etiam non elit lorem. Fusce ac orci metus. Phasellus pretium interdum sapien et vehicula. Aliquam erat volutpat. In hac habitasse platea dictumst. Sed mauris magna, tincidunt non rhoncus nec, gravida sit amet ex. Sed ornare ipsum ultricies, euismod augue eget, maximus libero. Mauris convallis tincidunt ipsum, sed scelerisque neque egestas quis.
+3D Imaging Scanning (pQCT/TBone Studies) is used to examine microscopic internal structures of bones.
 
-Phasellus in nibh sit amet ex ornare dapibus. Nulla venenatis dolor ut lorem blandit porttitor id non erat. Phasellus porta, massa et sollicitudin eleifend, felis libero feugiat tortor, pharetra finibus nunc magna vitae turpis. Nunc cursus metus metus, vel bibendum lectus interdum sit amet. Nam eu magna erat. Morbi a diam eget felis gravida posuere. In hac habitasse platea dictumst. Sed pellentesque nisl id nibh pulvinar porttitor.
 
-Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Maecenas molestie erat eros, sed facilisis quam interdum nec. Suspendisse ullamcorper lacus imperdiet euismod tincidunt. Proin sed dapibus lectus. Quisque ut malesuada urna, in sodales dolor. Aenean non nisl viverra enim porttitor viverra. Suspendisse potenti. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vivamus a pellentesque risus, vitae mollis augue. Duis ullamcorper quam a leo luctus feugiat. Duis eget ipsum eros. Suspendisse potenti. Cras eu iaculis diam, non vulputate nibh. Sed faucibus, purus vel iaculis pulvinar, nulla nisl malesuada nulla, sed facilisis elit nunc vitae lorem. Nam non cursus augue. Quisque laoreet nec lacus semper sagittis.
+> Testing for structure: 
+
+Urine and Blood Tests:
+Urine Biomarkers:
+C-Telopeptide - Type 1 collagen makes up most organic protein in the body. When osteoclasts are dissolving bone tissue, the collagen is destroyed. Which causes C- terminal Telopeptide and N-terminal Telopeptide fragments into the body. During spaceflight, urinary CTX 1 and NTX are expected to have an 50-80% increase. 
+
+Hypercalciuria (high calcium in urine) - Stored calcium is released since bones no longer undergo stress or load and are released into the bloodstream. This also elevates the risk of the formation of a renal kidney stone formation ( renal kidney stones can form, this causes pain (renal colic), blood in urine (hematuria), infection/sepsis(sepsis is the immune system damaging the organs due to an infection), swollen kidney due to build up of urine(hydronephrosis, this can cause kidney failure). 
+Renal Kidney Stone Formation Prevention: 
+Potassium citrate - oral alkalizing agent that binds to urinary calcium and inhibits crystal formation
+Exercise using ARED to stimulate skeletal loading (prevents bone loss)
+Biphosphonates - suppress osteoclast activity
+Hydration - dilutes urinary solute concentration
+Diet - sodium intake is reduced (sodium can cause hypercalciuria - the kidney’s tubular reabsorption of calcium is decreased, therefore more calcium is excreted in the urine. This is because high sodium intake causes an increase in extracellular fluid volume. So, reabsorption is decreased to increase excretion, since both sodium and calcium reabsorption work parallely, high calcium in blood.)
+
 
 > Sources:
 > 1. National Institutes of Health (2023) - [Bone Health and Osteoporosis](https://www.niams.nih.gov/health-topics/bone-health-and-osteoporosis) [Accessed 14th November 2026]
