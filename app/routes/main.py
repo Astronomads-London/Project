@@ -1,5 +1,5 @@
 from flask import Blueprint, redirect, render_template, session, request
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from app.utils.birthday import birthday_error, birthday_limits
 from app.utils.bloodpressure import (
     BLOOD_PRESSURE_ERROR,
@@ -7,7 +7,10 @@ from app.utils.bloodpressure import (
     MIN_PULSE_PRESSURE,
     SYSTOLIC_RANGE,
 )
+from app.utils.charts import CHART_DAYS, build_charts
+from app.utils.flags import vital_flags
 from app.utils.greeting import get_gmt_greeting
+from app.utils.messages import MESSAGE_ERRORS, MESSAGE_MAX_LENGTH, present_messages
 from app.utils.validation import (
     CONVERSION_LIMITS,
     DAY_TOTAL_ERROR,
@@ -20,16 +23,21 @@ from app.utils.validation import (
     USERNAME_MIN_LENGTH,
     launch_date_limits
 )
-from app.utils.vital_signs import (
-    blood_oxygen,
-    breathing_rate,
-    heart_rate,
-    blood_pressure,
-    temperature,
-)
 import db
 
 main_bp = Blueprint("main", __name__)
+
+DASHBOARD_MESSAGES = 3  # latest flight surgeon messages shown on the dashboard
+THREAD_MESSAGES = 100   # latest messages shown on the messages page
+
+
+def _is_surgeon_session():
+    """True when the logged-in account signed in as a flight surgeon.
+
+    Only used to steer flight surgeons away from the astronaut pages; the
+    flight surgeon pages check the account itself.
+    """
+    return session.get("role") == db.ROLE_FLIGHT_SURGEON
 
 
 @main_bp.route("/", methods=["GET", "POST"])
@@ -58,6 +66,7 @@ def register():
             birthday_error=birthday_error(),
             username_length=(USERNAME_MIN_LENGTH, USERNAME_MAX_LENGTH),
             password_length=(PASSWORD_MIN_LENGTH, PASSWORD_MAX_LENGTH),
+            is_surgeon=request.args.get("type") == db.ROLE_FLIGHT_SURGEON,
         )
 
 
@@ -73,63 +82,24 @@ def dashboard():
 
     username = session["username"]
     user = db.get_user(username) or {}
+    # The account decides the role, so a session from before a role change is corrected here.
+    role = db.ROLE_FLIGHT_SURGEON if db.is_flight_surgeon(user) else db.ROLE_ASTRONAUT
+    if session.get("role") != role:
+        session["role"] = role
+    if role == db.ROLE_FLIGHT_SURGEON:
+        return redirect("/surgeon")
+
     is_female = str(user.get("sex", "")).strip().lower() in {"female", "f"}
     today_data = db.get_today_data(username)
     streak = db.get_current_streak(username)
     db.edit_user(username, "streak", streak)
     user["streak"] = streak
     today = datetime.now(timezone.utc).date()
-    dates = [today - timedelta(days=offset) for offset in range(6, -1, -1)]
-    chart_definitions = (
-        ("sleep_hours", "Sleep", "hours", user.get("sleep_target", 8)),
-        ("resting_heart_rate", "Resting heart rate", "bpm", None),
-        ("glucose_level", "Glucose", "mg/dL", None),
-        ("blood_pressure", "Blood pressure · systolic", "mmHg", None),
-        ("water", "Water intake", "ml", user.get("water_target", 2500)),
-        ("breaths_per_min", "Breaths per minute", "breaths/min", None),
-        ("o2_level", "Blood oxygen", "%", None),
-        ("body_temp", "Body temperature", "°C", None),
-    )
-    charts = []
-    for field, title, unit, target in chart_definitions:
-        records = db.get_last_7_days_data(username, field)
-        values_by_date = {record["date"]: record.get(field) for record in records}
-        points = []
-        for day in dates:
-            value = values_by_date.get(day.isoformat())
-            if field == "blood_pressure":
-                value = str(value).strip() if value is not None else None
-            elif value is not None:
-                try:
-                    value = float(value)
-                except (TypeError, ValueError):
-                    value = None
-            points.append({"label": day.strftime("%a"), "value": value})
-        charts.append({
-            "field": field,
-            "title": title,
-            "unit": unit,
-            "target": target,
-            "points": points,
-        })
-
-    alerts = []
-    if today_data:
-        vitals_checks = [
-            ("blood oxygen", today_data.get("o2_level") if today_data.get("o2_level") is not None else today_data.get("blood_oxygen"), blood_oxygen, float),
-            ("breathing rate", today_data.get("breaths_per_min") if today_data.get("breaths_per_min") is not None else today_data.get("breathing_rate"), breathing_rate, float),
-            ("heart rate", today_data.get("resting_heart_rate") if today_data.get("resting_heart_rate") is not None else today_data.get("heart_rate"), heart_rate, float),
-            ("blood pressure", today_data.get("blood_pressure"), blood_pressure, str),
-            ("temperature", today_data.get("body_temp") if today_data.get("body_temp") is not None else today_data.get("temperature"), temperature, float),
-        ]
-        for name, val, func, cast in vitals_checks:
-            if val is not None and val != "":
-                try:
-                    status = func(cast(val) if cast is not str else str(val).strip())
-                    if status and status.lower() != "normal":
-                        alerts.append(f"Your {name} is {status.lower()}!")
-                except Exception:
-                    pass
+    charts = build_charts(db.get_recent_data(CHART_DAYS, username), user, today)
+    alerts = [
+        f"Your {flag['name']} is {flag['status'].lower()}!"
+        for flag in vital_flags(today_data or {})
+    ]
 
     missing_fields = []
     health_data_items = [
@@ -173,6 +143,39 @@ def dashboard():
         alerts=alerts,
         missing_health_data_alert=missing_health_data_alert,
         is_female=is_female,
+        messages=present_messages(
+            db.get_messages(
+                astronaut=username,
+                sender_role=db.ROLE_FLIGHT_SURGEON,
+                limit=DASHBOARD_MESSAGES,
+            ),
+            db.ROLE_ASTRONAUT,
+        ),
+    )
+
+
+@main_bp.route("/messages", methods=["GET"])
+def messages():
+    if "username" not in session:
+        return redirect("/login")
+    if _is_surgeon_session():
+        return redirect("/surgeon/treatment")
+
+    username = session["username"]
+    shown = present_messages(
+        db.get_messages(astronaut=username, limit=THREAD_MESSAGES), db.ROLE_ASTRONAUT
+    )
+    # Opening this page is what marks the flight surgeons' messages as read.
+    if any(message["new"] for message in shown):
+        db.mark_messages_read(username, db.ROLE_FLIGHT_SURGEON)
+
+    return render_template(
+        "messages.html",
+        username=username,
+        messages=shown,
+        error=MESSAGE_ERRORS.get(request.args.get("error")),
+        sent=request.args.get("sent") == "true",
+        max_length=MESSAGE_MAX_LENGTH,
     )
 
 
@@ -180,6 +183,8 @@ def dashboard():
 def pvt():
     if "username" not in session:
         return redirect("/login")
+    if _is_surgeon_session():
+        return redirect("/surgeon")
     return render_template("pvt.html", username=session["username"])
 
 
@@ -188,6 +193,8 @@ def pvt():
 def today_data():
     if "username" not in session:
         return redirect("/login")
+    if _is_surgeon_session():
+        return redirect("/surgeon")
 
     username = session["username"]
     return render_template(
@@ -212,6 +219,8 @@ def today_data():
 def settings():
     if "username" not in session:
         return redirect("/login")
+    if _is_surgeon_session():
+        return redirect("/surgeon")
 
     user = db.get_user(session["username"]) or {}
     birthday_min, birthday_max = birthday_limits()

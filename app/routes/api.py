@@ -1,3 +1,4 @@
+import hmac
 import math
 from datetime import datetime, timezone
 
@@ -7,6 +8,7 @@ from app.utils.unitconversion import height_to_cm, pounds_to_kg, cm_to_feet_and_
 from app.utils.birthday import birthday_error, parse_birthday
 from app.utils.bloodpressure import BLOOD_PRESSURE_ERROR, parse_blood_pressure
 from app.utils.unitconversion import height_to_cm, pounds_to_kg
+from app.utils.messages import clean_message
 from app.utils.uring import urine
 from app.utils.validation import (
     CONVERSION_LIMITS,
@@ -524,6 +526,13 @@ def edit_settings():
     else:
         return jsonify(error="Failed to update settings."), 500
 
+def _codes_match(entered, expected):
+    """Compare an entered invite code with a configured one; an unset code matches nothing."""
+    if not expected or not isinstance(entered, str):
+        return False
+    return hmac.compare_digest(entered.encode(), expected.encode())
+
+
 @api_bp.route("/login", methods=["POST"])
 def login():
     username = request.form.get("username")
@@ -535,6 +544,10 @@ def login():
         is_valid = auth_login(username, username, password, db.return_user_hash(username))
         if is_valid:
             session["username"] = username
+            if db.is_flight_surgeon(db.get_user(username)):
+                session["role"] = db.ROLE_FLIGHT_SURGEON
+                return redirect("/surgeon")
+            session["role"] = db.ROLE_ASTRONAUT
             return redirect("/dashboard")
         else:
             return redirect("/login?error=invalid")
@@ -546,54 +559,96 @@ def login():
 def register():
     username = (request.form.get("username") or "").strip()
     password = request.form.get("password") or ""
-    birthday_value = request.form.get("birthday", "")
-    height = request.form.get("height")
-    mass = request.form.get("mass") or request.form.get("body-mass")
-    sex = request.form.get("sex")
     invitecode = request.form.get("invite_code")
     expected_invite_code = current_app.config.get("INVITE_CODE")
+    # The sign-up form's Astronaut / Flight surgeon switch.
+    is_surgeon = request.form.get("account_type") == db.ROLE_FLIGHT_SURGEON
+
+    def fail(error):
+        # Keep the switch on the same side when the form is shown again.
+        kind = "type=flight_surgeon&" if is_surgeon else ""
+        return redirect(f"/register?{kind}error={error}")
 
     if not expected_invite_code:
         current_app.logger.error("INVITE_CODE is not configured.")
-        return redirect("/register?error=invite_unavailable")
+        return fail("invite_unavailable")
 
-    if invitecode != expected_invite_code:
-        return redirect("/register?error=invalid_invitecode")
+    # Each kind of account has its own invite code. A flight surgeon code that
+    # is identical to the astronaut code is refused, so the astronaut code can
+    # never hand out flight surgeon access.
+    if is_surgeon:
+        code_ok = (
+            _codes_match(invitecode, current_app.config.get("SURGEON_INVITE_CODE"))
+            and not _codes_match(invitecode, expected_invite_code)
+        )
+    else:
+        code_ok = _codes_match(invitecode, expected_invite_code)
+    if not code_ok:
+        return fail("invalid_invitecode")
 
     if not USERNAME_PATTERN.fullmatch(username):
-        return redirect("/register?error=invalid_username")
+        return fail("invalid_username")
 
     if not PASSWORD_MIN_LENGTH <= len(password) <= PASSWORD_MAX_LENGTH:
-        return redirect("/register?error=invalid_password")
+        return fail("invalid_password")
 
-    if sex not in SEX_CHOICES:
-        return redirect("/register?error=invalid_sex")
+    if is_surgeon:
+        # Flight surgeons do not log health data, so they have no profile.
+        role = db.ROLE_FLIGHT_SURGEON
+        birthday = height = mass = sex = None
+    else:
+        role = db.ROLE_ASTRONAUT
+        sex = request.form.get("sex")
+        if sex not in SEX_CHOICES:
+            return fail("invalid_sex")
 
-    birthday = parse_birthday(birthday_value)
-    if birthday is None:
-        return redirect("/register?error=invalid_birthday")
+        birthday = parse_birthday(request.form.get("birthday", ""))
+        if birthday is None:
+            return fail("invalid_birthday")
+        birthday = birthday.isoformat()
 
-    # Every profile field is required at sign-up, so a blank value is rejected too.
-    height = parse_profile_measurement("height", height)
-    if height is None:
-        return redirect("/register?error=invalid_height")
+        # Every profile field is required for astronauts, so a blank value is rejected too.
+        height = parse_profile_measurement("height", request.form.get("height"))
+        if height is None:
+            return fail("invalid_height")
 
-    mass = parse_profile_measurement("mass", mass)
-    if mass is None:
-        return redirect("/register?error=invalid_mass")
+        mass = parse_profile_measurement("mass", request.form.get("mass") or request.form.get("body-mass"))
+        if mass is None:
+            return fail("invalid_mass")
 
     if db.user_exists(username):
-        return redirect("/register?error=username_exists")
+        return fail("username_exists")
 
     hashed_password = hash_password(password)
-    success = db.new_user(username, hashed_password, birthday.isoformat(), height, mass, sex)
+    success = db.new_user(username, hashed_password, birthday, height, mass, sex, role)
     if success:
         session["username"] = username
-        return redirect("/dashboard")
+        session["role"] = role
+        return redirect("/surgeon" if is_surgeon else "/dashboard")
     else:
-        return redirect("/register?error=database_error")
+        return fail("database_error")
+
+@api_bp.route("/messages", methods=["POST"])
+def send_message():
+    """Add an astronaut's reply to their conversation with the flight surgeons."""
+    username = session.get("username")
+    user = db.get_user(username) if username else None
+    if not user:
+        return redirect("/login")
+    if db.is_flight_surgeon(user):
+        # Flight surgeons write from the treatment page, to a chosen astronaut.
+        return redirect("/surgeon/treatment")
+
+    text, error = clean_message(request.form.get("message"))
+    if error is None and not db.add_message(username, username, db.ROLE_ASTRONAUT, text):
+        error = "save"
+    if error:
+        return redirect(f"/messages?error={error}")
+    return redirect("/messages?sent=true")
+
 
 @api_bp.route("/logout", methods=["GET"])
 def logout():
     session.pop("username", None)
+    session.pop("role", None)
     return redirect("/")

@@ -358,7 +358,82 @@ a { color: inherit; }
 }
 
 .auth-card--signup {
-  height: calc(720 * var(--u));
+  height: calc(772 * var(--u));
+}
+
+/* Flight surgeon sign-up has no profile fields, so everything below them moves up. */
+.auth-card--signup.auth-card--surgeon {
+  height: calc(571 * var(--u));
+}
+
+.auth-card--surgeon .field--astronaut {
+  display: none;
+}
+
+.auth-card--surgeon .field--invite {
+  --y: 348 !important;
+}
+
+.auth-card--surgeon .btn--signup {
+  --y: 461 !important;
+}
+
+.auth-card__error--signup {
+  top: calc(640 * var(--u));
+}
+
+.auth-card--surgeon .auth-card__error--signup {
+  top: calc(439 * var(--u));
+}
+
+/* Astronaut / Flight surgeon switch on the sign-up card. */
+.account-type {
+  position: absolute;
+  left: calc(34 * var(--u));
+  top: calc(88 * var(--u));
+  display: flex;
+  width: calc(511.145 * var(--u));
+  height: calc(44 * var(--u));
+  border: calc(2 * var(--u)) solid var(--color-body);
+  border-radius: calc(10.649 * var(--u));
+  overflow: hidden;
+}
+
+.account-type label {
+  position: relative;
+  flex: 1;
+  cursor: pointer;
+}
+
+.account-type input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.account-type span {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: var(--color-muted);
+  font-family: "M PLUS 1p", sans-serif;
+  font-weight: 700;
+  font-size: calc(15 * var(--u));
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.account-type input:checked + span {
+  background: var(--color-body);
+  color: var(--color-surface-alt);
+}
+
+.account-type input:focus-visible + span {
+  outline: calc(3 * var(--u)) solid var(--color-ink);
+  outline-offset: calc(-6 * var(--u));
 }
 
 .auth-card__title,
@@ -387,8 +462,12 @@ a { color: inherit; }
 
 .auth-card__link--login {
   left: 50%;
-  top: calc(684 * var(--u));
+  top: calc(736 * var(--u));
   transform: translate(-50%, -50%);
+}
+
+.auth-card--surgeon .auth-card__link--login {
+  top: calc(535 * var(--u));
 }
 
 .auth-card__link:hover,
@@ -2415,3 +2494,331 @@ body.dashboard.env-moon {
     transition: none;
   }
 }
+
+/* ---------- Flight surgeon ---------- */
+.surgeon .dashboard__heading h1,
+.surgeon-crew__name {
+  overflow-wrap: anywhere;
+}
+
+.page--dashboard .surgeon-card {
+  margin-top: clamp(16px, calc(22 * var(--u)), 28px);
+  padding: clamp(20px, calc(30 * var(--u)), 38px);
+}
+
+.page--dashboard .surgeon-card > .surgeon-empty,
+.page--dashboard .surgeon-card > .surgeon-note {
+  margin-top: 14px;
+  font-size: 14px;
+}
+
+.surgeon-table-wrap {
+  margin-top: 18px;
+  overflow-x: auto;
+}
+
+.surgeon-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #e9faff;
+  font: 14px "Inter", sans-serif;
+  text-align: left;
+}
+
+.surgeon-table th,
+.surgeon-table td {
+  padding: 10px 18px 10px 0;
+  border-bottom: 1px solid rgba(202, 232, 247, 0.13);
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.surgeon-table tbody tr:last-child th,
+.surgeon-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.surgeon-table thead th {
+  color: #a4bac8;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.surgeon-table thead small {
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.surgeon-table tbody th {
+  font-weight: 600;
+}
+
+.surgeon-table a {
+  color: #b7f4ff;
+  text-underline-offset: 4px;
+}
+
+.surgeon-status {
+  display: inline-block;
+  padding: 3px 10px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font: 600 12px "Inter", sans-serif;
+  white-space: nowrap;
+}
+
+.surgeon-status--concerning {
+  background-color: #ffd8a8;
+  color: #431407;
+}
+
+.surgeon-status--critical {
+  background-color: #d81f1f;
+  color: #ffffff;
+}
+
+.surgeon-status--clear {
+  border-color: rgba(145, 230, 190, 0.4);
+  color: #91e6be;
+}
+
+.surgeon-crew {
+  display: grid;
+  gap: 10px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.surgeon-crew__link {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+  align-items: center;
+  gap: 8px 18px;
+  padding: 14px 18px;
+  border: 1px solid rgba(149, 216, 239, 0.25);
+  border-radius: 12px;
+  background: rgba(7, 18, 30, 0.5);
+  color: #e9faff;
+  text-decoration: none;
+  transition: border-color 160ms ease, background-color 160ms ease;
+}
+
+.surgeon-crew__link:hover,
+.surgeon-crew__link:focus-visible {
+  border-color: rgba(149, 216, 239, 0.75);
+  background: rgba(79, 169, 205, 0.16);
+  outline: none;
+}
+
+.surgeon-crew__name {
+  font: 600 16px "Inter", sans-serif;
+}
+
+.surgeon-crew__link .surgeon-status {
+  justify-self: start;
+}
+
+.surgeon-crew__meta {
+  color: #a4bac8;
+  font: 13px "Inter", sans-serif;
+}
+
+.surgeon-crew__action {
+  color: #b7f4ff;
+  font: 600 13px "Inter", sans-serif;
+}
+
+.surgeon-profile {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px 24px;
+  margin: 18px 0 0;
+}
+
+.surgeon-profile dt {
+  color: #a4bac8;
+  font: 12px "Inter", sans-serif;
+}
+
+.surgeon-profile dd {
+  margin: 4px 0 0;
+  color: #e9faff;
+  font: 600 16px "Inter", sans-serif;
+}
+
+@media (max-width: 700px) {
+  .surgeon-crew__link {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .surgeon-crew__link {
+    transition: none;
+  }
+}
+
+/* ---------- Messages between flight surgeons and astronauts ---------- */
+.page--dashboard .message-card {
+  margin-top: clamp(16px, calc(22 * var(--u)), 28px);
+  padding: clamp(20px, calc(30 * var(--u)), 38px);
+}
+
+.page--dashboard .message-card--dashboard {
+  margin: 0 0 clamp(16px, calc(22 * var(--u)), 28px);
+}
+
+.page--dashboard .message-card > .message-empty,
+.page--dashboard .message-card > .message-links {
+  margin-top: 14px;
+  font-size: 14px;
+}
+
+.message-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+
+.message-links a,
+.message__meta a {
+  color: #b7f4ff;
+  text-underline-offset: 4px;
+}
+
+.surgeon-record__treatment {
+  margin-left: 20px;
+}
+
+.message-list {
+  display: grid;
+  gap: 10px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.message {
+  padding: 14px 18px;
+  border: 1px solid rgba(149, 216, 239, 0.25);
+  border-left: 4px solid #59cbe7;
+  border-radius: 12px;
+  background: rgba(7, 18, 30, 0.5);
+}
+
+.message--astronaut {
+  border-left-color: #74d6a2;
+}
+
+.message--new {
+  background: rgba(79, 169, 205, 0.18);
+}
+
+.message__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  margin: 0;
+  color: #a4bac8;
+  font: 13px "Inter", sans-serif;
+}
+
+.message__sender {
+  color: #e9faff;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.message__new {
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: #59cbe7;
+  color: #06202b;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.message__body {
+  margin: 8px 0 0;
+  color: #e9faff;
+  font: 15px/1.55 "Inter", sans-serif;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.message-list--compact .message__body {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+}
+
+.message-form {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.message-form label {
+  display: grid;
+  gap: 8px;
+  color: #e4edf2;
+  font: 600 14px "Inter", sans-serif;
+}
+
+.message-form select,
+.message-form textarea {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid rgba(202, 232, 247, 0.28);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.28);
+  color: #fff;
+  color-scheme: dark;
+  font: 16px/1.5 "Inter", sans-serif;
+}
+
+.message-form select {
+  max-width: 360px;
+  min-height: 46px;
+}
+
+.message-form textarea {
+  min-height: 130px;
+  resize: vertical;
+}
+
+.message-form select:focus-visible,
+.message-form textarea:focus-visible {
+  outline: 2px solid #8ce2f3;
+  outline-offset: 2px;
+}
+
+.message-form button {
+  justify-self: start;
+  min-height: 46px;
+  padding: 10px 18px;
+  border: 1px solid rgba(149, 216, 239, 0.5);
+  border-radius: 8px;
+  background: #167a9c;
+  color: #fff;
+  font: 600 14px "Inter", sans-serif;
+  cursor: pointer;
+}
+
+.message-form button:hover,
+.message-form button:focus-visible {
+  background: #209bbd;
+}
+
+.message-notice {
+  margin: 0;
+  font: 14px "Inter", sans-serif;
+}
+
+.message-notice--success { color: #91e6be; }
+.message-notice--error { color: #ff9a9a; }

@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% from "_messages.html" import message_list %}
+
+{% block title %}Flight Surgeon — 11:56{% endblock %}
+{% block body_class %}dashboard{% endblock %}
+{% block page_class %}page--dashboard{% endblock %}
+
+{% block content %}
+<main class="dashboard surgeon">
+  <header class="dashboard__heading">
+    <p class="dashboard__eyebrow">FLIGHT SURGEON</p>
+    <h1>{{ greeting }}, {{ username }}!</h1>
+    <p class="dashboard__intro">
+      {{ astronauts|length }} astronaut{{ '' if astronauts|length == 1 else 's' }} ·
+      {% if flagged_count %}{{ flagged_count }} with flagged readings in the last {{ flag_days }} days.
+      {% else %}no flagged readings in the last {{ flag_days }} days.{% endif %}
+    </p>
+  </header>
+
+  <section class="dashboard-card surgeon-card" aria-labelledby="surgeon-flags-title">
+    <div>
+      <p class="dashboard-card__eyebrow">LAST {{ flag_days }} DAYS</p>
+      <h2 id="surgeon-flags-title">Flagged readings</h2>
+    </div>
+    {% if flags %}
+      <div class="surgeon-table-wrap">
+        <table class="surgeon-table">
+          <thead>
+            <tr>
+              <th scope="col">Astronaut</th>
+              <th scope="col">Logged</th>
+              <th scope="col">Reading</th>
+              <th scope="col">Value</th>
+              <th scope="col">Flag</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for flag in flags %}
+              <tr>
+                <th scope="row"><a href="{{ url_for('surgeon.astronaut', username=flag.username) }}">{{ flag.username }}</a></th>
+                <td>{{ flag.day }}</td>
+                <td>{{ flag.name }}</td>
+                <td>{{ flag.reading }}</td>
+                <td><span class="surgeon-status surgeon-status--{{ 'critical' if flag.critical else 'concerning' }}">{{ flag.status }}</span></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="surgeon-empty">No astronaut has logged a reading outside its normal range in the last {{ flag_days }} days.</p>
+    {% endif %}
+  </section>
+
+  <section class="dashboard-card message-card" aria-labelledby="surgeon-messages-title">
+    <div>
+      <p class="dashboard-card__eyebrow">TREATMENT</p>
+      <h2 id="surgeon-messages-title">Recent messages</h2>
+    </div>
+    {% if messages %}
+      {{ message_list(messages, link_astronaut=true, compact=true) }}
+    {% else %}
+      <p class="message-empty">No messages have been sent yet.</p>
+    {% endif %}
+    <a class="dashboard__log-link" href="{{ url_for('surgeon.treatment') }}">Write a treatment <span aria-hidden="true">→</span></a>
+  </section>
+
+  <section class="dashboard-card surgeon-card" aria-labelledby="surgeon-crew-title">
+    <div>
+      <p class="dashboard-card__eyebrow">CREW</p>
+      <h2 id="surgeon-crew-title">Astronauts</h2>
+    </div>
+    {% if astronauts %}
+      <ul class="surgeon-crew">
+        {% for astronaut in astronauts %}
+          <li>
+            <a class="surgeon-crew__link" href="{{ url_for('surgeon.astronaut', username=astronaut.username) }}">
+              <span class="surgeon-crew__name">{{ astronaut.username }}</span>
+              <span class="surgeon-crew__meta">{{ astronaut.last_logged }}</span>
+              {% if astronaut.flag_count %}
+                <span class="surgeon-status surgeon-status--{{ 'critical' if astronaut.critical else 'concerning' }}">{{ astronaut.flag_count }} flag{{ '' if astronaut.flag_count == 1 else 's' }}</span>
+              {% else %}
+                <span class="surgeon-status surgeon-status--clear">No flags</span>
+              {% endif %}
+              <span class="surgeon-crew__action">View data <span aria-hidden="true">→</span></span>
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="surgeon-empty">No astronauts have signed up yet.</p>
+    {% endif %}
+  </section>
+</main>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% from "_messages.html" import message_list %}
+
+{% block title %}Messages — 11:56{% endblock %}
+{% block body_class %}dashboard{% endblock %}
+{% block page_class %}page--dashboard{% endblock %}
+
+{% block content %}
+<main class="dashboard">
+  <header class="dashboard__heading">
+    <p class="dashboard__eyebrow">CREW WELLNESS · FLIGHT SURGEON</p>
+    <h1>Messages</h1>
+    <p class="dashboard__intro">Treatment instructions from your flight surgeons, and your replies to them.</p>
+  </header>
+
+  <section class="dashboard-card message-card" aria-labelledby="messages-reply-title">
+    <div>
+      <p class="dashboard-card__eyebrow">REPLY</p>
+      <h2 id="messages-reply-title">Message your flight surgeons</h2>
+    </div>
+    <form class="message-form" action="{{ url_for('api.send_message') }}" method="post">
+      {% if sent %}
+        <p class="message-notice message-notice--success" role="status">Your message was sent.</p>
+      {% elif error %}
+        <p class="message-notice message-notice--error" role="alert">{{ error }}</p>
+      {% endif %}
+      <label>
+        <span>Message</span>
+        <textarea name="message" maxlength="{{ max_length }}" required></textarea>
+      </label>
+      <button type="submit">Send message</button>
+    </form>
+  </section>
+
+  <section class="dashboard-card message-card" aria-labelledby="messages-list-title">
+    <div>
+      <p class="dashboard-card__eyebrow">NEWEST FIRST</p>
+      <h2 id="messages-list-title">Conversation</h2>
+    </div>
+    {% if messages %}
+      {{ message_list(messages) }}
+    {% else %}
+      <p class="message-empty">No messages yet. Instructions from your flight surgeons will appear here.</p>
+    {% endif %}
+  </section>
+</main>
+{% endblock %}

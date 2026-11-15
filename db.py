@@ -31,11 +31,20 @@ if "ReportedData" not in database.list_collection_names():
 if "PVTResults" not in database.list_collection_names():
     database.create_collection("PVTResults")
 
+if "Messages" not in database.list_collection_names():
+    database.create_collection("Messages")
+
 
 # Collections:
 users_collection = database["Users"]
 reported_data_collection = database["ReportedData"]
 pvt_results_collection = database["PVTResults"]
+messages_collection = database["Messages"]
+
+messages_collection.create_index(
+    [("astronaut", ASCENDING), ("sent_at", -1)],
+    name="astronaut_1_sent_at_-1",
+)
 
 reported_data_collection.create_index(
     [("username", ASCENDING), ("date", ASCENDING)],
@@ -50,15 +59,25 @@ if any(
 
 
 
+# Account roles. Accounts created before roles existed have no "role" field
+# and count as astronauts.
+ROLE_ASTRONAUT = "astronaut"
+ROLE_FLIGHT_SURGEON = "flight_surgeon"
+
+
 # Helper Functions
 def user_exists(username: str) -> bool:
     return users_collection.find_one({"username": username}) is not None
 
-def new_user(username: str, password_hash: str, birthday: str, height: float, mass: float, sex: str):
+def is_flight_surgeon(user: dict) -> bool:
+    return bool(user) and user.get("role") == ROLE_FLIGHT_SURGEON
+
+def new_user(username: str, password_hash: str, birthday: str, height: float, mass: float, sex: str, role: str = ROLE_ASTRONAUT):
     try:
         user = {
             "username": username,
             "password_hash": password_hash,
+            "role": role,
             "birthday": birthday,
             "height": height,
             "mass": mass,
@@ -216,6 +235,96 @@ def get_last_7_days_data(username:str, field:str) -> list:
     except Exception as e:
         print(f"❌ Error occurred while retrieving last 7 days data: {e}")
         return []
+
+def get_recent_data(days: int, username: str = None) -> list:
+    """Return the daily logs of the last `days` days (today included), newest first.
+
+    With a username only that account's logs are returned, otherwise everyone's.
+    """
+    today = datetime.now(timezone.utc)
+    earliest = today - timedelta(days=days - 1)
+    query = {"date": {"$gte": earliest.strftime("%Y-%m-%d"), "$lte": today.strftime("%Y-%m-%d")}}
+    if username is not None:
+        query["username"] = username
+    try:
+        return list(reported_data_collection.find(query, {"_id": 0}).sort("date", -1))
+    except Exception as e:
+        print(f"❌ Error occurred while retrieving recent data: {e}")
+        return []
+
+def get_astronauts() -> list:
+    """Return every astronaut account, sorted by username, without password hashes."""
+    try:
+        return list(
+            users_collection.find(
+                {"role": {"$ne": ROLE_FLIGHT_SURGEON}},
+                {"_id": 0, "password_hash": 0},
+            ).sort("username", ASCENDING)
+        )
+    except Exception as e:
+        print(f"❌ Error occurred while retrieving astronauts: {e}")
+        return []
+
+def get_pvt_results(username: str, limit: int = 10) -> list:
+    """Return the account's latest PVT results, newest first, without the per-trial records."""
+    try:
+        return list(
+            pvt_results_collection.find(
+                {"username": username},
+                {"_id": 0, "trials": 0, "configuration": 0},
+            ).sort("completed_at", -1).limit(limit)
+        )
+    except Exception as e:
+        print(f"❌ Error occurred while retrieving PVT results: {e}")
+        return []
+
+def add_message(astronaut: str, sender: str, sender_role: str, body: str) -> bool:
+    """Store a message in an astronaut's conversation with the flight surgeons.
+
+    astronaut is the account the conversation belongs to; sender wrote the
+    message and sender_role says which side they are on.
+    """
+    try:
+        messages_collection.insert_one({
+            "astronaut": astronaut,
+            "sender": sender,
+            "sender_role": sender_role,
+            "body": body,
+            "sent_at": datetime.now(timezone.utc),
+            "read": False,
+        })
+        return True
+    except Exception as e:
+        print(f"❌ Error occurred while saving message: {e}")
+        return False
+
+def get_messages(astronaut: str = None, sender_role: str = None, limit: int = 50) -> list:
+    """Return the latest messages, newest first.
+
+    astronaut limits them to one conversation and sender_role to one side.
+    """
+    query = {}
+    if astronaut is not None:
+        query["astronaut"] = astronaut
+    if sender_role is not None:
+        query["sender_role"] = sender_role
+    try:
+        return list(messages_collection.find(query, {"_id": 0}).sort("sent_at", -1).limit(limit))
+    except Exception as e:
+        print(f"❌ Error occurred while retrieving messages: {e}")
+        return []
+
+def mark_messages_read(astronaut: str, sender_role: str) -> bool:
+    """Mark one side's messages in an astronaut's conversation as read by the other side."""
+    try:
+        messages_collection.update_many(
+            {"astronaut": astronaut, "sender_role": sender_role, "read": False},
+            {"$set": {"read": True}},
+        )
+        return True
+    except Exception as e:
+        print(f"❌ Error occurred while marking messages read: {e}")
+        return False
 
 def save_pvt_result(username: str, started_at: datetime, trials: list, scores: dict) -> bool:
     try:
