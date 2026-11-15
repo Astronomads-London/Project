@@ -19,6 +19,12 @@ from app.utils.validation import (
     USERNAME_MAX_LENGTH,
     USERNAME_MIN_LENGTH,
     launch_date_limits,
+from app.utils.vital_signs import (
+    blood_oxygen,
+    breathing_rate,
+    heart_rate,
+    blood_pressure,
+    temperature,
 )
 import db
 
@@ -105,6 +111,24 @@ def dashboard():
             "points": points,
         })
 
+    alerts = []
+    if today_data:
+        vitals_checks = [
+            ("blood oxygen", today_data.get("o2_level") if today_data.get("o2_level") is not None else today_data.get("blood_oxygen"), blood_oxygen, float),
+            ("breathing rate", today_data.get("breaths_per_min") if today_data.get("breaths_per_min") is not None else today_data.get("breathing_rate"), breathing_rate, float),
+            ("heart rate", today_data.get("resting_heart_rate") if today_data.get("resting_heart_rate") is not None else today_data.get("heart_rate"), heart_rate, float),
+            ("blood pressure", today_data.get("blood_pressure"), blood_pressure, str),
+            ("temperature", today_data.get("body_temp") if today_data.get("body_temp") is not None else today_data.get("temperature"), temperature, float),
+        ]
+        for name, val, func, cast in vitals_checks:
+            if val is not None and val != "":
+                try:
+                    status = func(cast(val) if cast is not str else str(val).strip())
+                    if status and status.lower() != "normal":
+                        alerts.append(f"Your {name} is {status.lower()}!")
+                except Exception:
+                    pass
+
     return render_template(
         "dashboard.html",
         username=username,
@@ -113,6 +137,7 @@ def dashboard():
         today_data=today_data,
         user=user,
         charts=charts,
+        alerts=alerts,
     )
 
 

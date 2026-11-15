@@ -16,6 +16,15 @@
       <span class="dashboard__pvt-title">Brief Psychomotor Vigilance Test</span>
       <span class="dashboard__pvt-action">Start PVT-B <span aria-hidden="true">→</span></span>
     </a>
+    {% if alerts %}
+      <div class="dashboard__alerts">
+        {% for alert in alerts %}
+          <div class="dashboard-alert {% if 'critical' in alert|lower %}dashboard-alert--critical{% else %}dashboard-alert--concerning{% endif %}">
+            <p>{{ alert }}</p>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
   </header>
 
   <section class="dashboard__overview" aria-label="Daily wellness overview">
