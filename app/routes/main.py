@@ -72,6 +72,7 @@ def dashboard():
 
     username = session["username"]
     user = db.get_user(username) or {}
+    is_female = str(user.get("sex", "")).strip().lower() in {"female", "f"}
     today_data = db.get_today_data(username)
     streak = db.get_current_streak(username)
     db.edit_user(username, "streak", streak)
@@ -138,6 +139,7 @@ def dashboard():
         user=user,
         charts=charts,
         alerts=alerts,
+        is_female=is_female,
     )
 
 
