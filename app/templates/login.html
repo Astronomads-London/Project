@@ -1,27 +1,35 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-</head>
-<body>
-    <h1>Login</h1>
-    <form action="{{ url_for('api.login') }}" method="post">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required>
-        <br>
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required>
-        <br>
-        <button type="submit">Log in</button>
-    </form>
-    <form action="{{ url_for('main.register') }}" method="get">
-        <button type="submit">Sign up</button>
-    </form>
+{% extends "base.html" %}
 
-    {% if error %}
-        <p style="color: red;">Invalid username or password.</p>
-    {% endif %}
-</body>
-</html>
+{% block title %}Log In — 11:56{% endblock %}
+{% block body_class %}auth{% endblock %}
+{% block page_class %}page--auth{% endblock %}
+
+{% block content %}
+<div class="auth__bg" aria-hidden="true">
+  <img src="{{ url_for('static', filename='assets/starfield.jpg') }}" alt="">
+</div>
+
+<main class="auth-card">
+  <h1 class="auth-card__title">Log In</h1>
+
+  {% if error %}
+    <p class="auth-card__error" style="position: absolute; top: calc(115 * var(--u)); left: 0; width: 100%; text-align: center; color: #ff6b6b; margin: 0; font-family: 'Inter', sans-serif; font-size: calc(16 * var(--u));">Invalid username or password.</p>
+  {% endif %}
+
+  <form action="{{ url_for('api.login') }}" method="post">
+    <label class="field" style="--x:34; --y:177.97; --w:511.145">
+      <span class="field__label">USERNAME</span>
+      <input class="field__input" type="text" name="username" placeholder="Astronaut39..." autocomplete="username" required>
+    </label>
+
+    <label class="field" style="--x:34; --y:317.97; --w:511.145">
+      <span class="field__label">PASSWORD</span>
+      <input class="field__input" type="password" name="password" autocomplete="current-password" required>
+    </label>
+
+    <button class="btn" type="submit" style="--x:52; --y:453; --w:476.558; --h:94">LOG IN NOW</button>
+  </form>
+
+  <a class="auth-card__link" href="{{ url_for('main.register') }}">New here? Sign up now</a>
+</main>
+{% endblock %}

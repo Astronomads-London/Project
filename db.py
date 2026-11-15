@@ -1,7 +1,9 @@
 import os
-from datetime import datetime
+import math
+from datetime import datetime, timezone, timedelta
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
+from pymongo import ASCENDING
 
 TEST_MONGODB_URI = "mongodb+srv://astronomads_db_user:h4LR4FActK0wkJJy@cluster0.bfvf9dg.mongodb.net/?"
 if not TEST_MONGODB_URI or not TEST_MONGODB_URI.strip():
@@ -24,23 +26,36 @@ database = client["App"]
 if "Users" not in database.list_collection_names():
     database.create_collection("Users")
 
+if "ReportedData" not in database.list_collection_names():
+    database.create_collection("ReportedData")
+
 
 # Collections:
 users_collection = database["Users"]
+
+
+
 
 # Helper Functions
 def user_exists(username: str) -> bool:
     return users_collection.find_one({"username": username}) is not None
 
-def new_user(username: str, password_hash: str, age: int, height: float, mass: float, sex: str):
+def new_user(username: str, password_hash: str, birthday: str, height: float, mass: float, sex: str):
     try:
         user = {
             "username": username,
             "password_hash": password_hash,
-            "age": age,
+            "birthday": birthday,
             "height": height,
             "mass": mass,
-            "sex": sex
+            "sex": sex,
+            "water_target": 2500,
+            "exercise_target": 60,
+            "sleep_target": 8,
+            "hydration_reminder": 0, # 0 = off, 1 = every hour, 2 = every 2 hours
+            "environment": "ISS", # Mars, Moon
+            "launch_date": datetime.utcnow().isoformat(),
+            "mission_duration": 180, # in days
         }
         users_collection.insert_one(user)
         return True
@@ -54,100 +69,36 @@ def return_user_hash(username: str) -> str:
         return user["password_hash"]
     return None
 
-def new_data_entry(username: str, category: str, data: dict) -> bool:
-    if not user_exists(username):
-        raise ValueError("User does not exist")
+def edit_user(username: str, field: str, new_value):
+    try:
+        result = users_collection.update_one({"username": username}, {"$set": {field: new_value}})
+        return result.modified_count > 0
+    except Exception as e:
+        print(f"❌ Error occurred while editing user: {e}")
+        return False
 
-    match category:
-        case "daily_exercise":
-            entry = {
-                **data,
-                "date": datetime.now().strftime("%d%m%Y"),
-            }
-            users_collection.update_one(
-                {"username": username},
-                {"$push": {"daily_exercise": entry}}
-            )
-            return True
-        case "water_intake":
-            entry = {
-                **data,
-                "date": datetime.now().strftime("%d%m%Y"),
-            }
-            users_collection.update_one(
-                {"username": username},
-                {"$push": {"water_intake": entry}}
-            )
-            return True
-        case "body_temperature":
-            entry = {
-                **data,
-                "date": datetime.now().strftime("%d%m%Y"),
-            }
-            users_collection.update_one(
-                {"username": username},
-                {"$push": {"body_temperature": entry}}
-            )
-            return True
-        case "sleep_time":
-            entry = {
-                **data,
-                "date": datetime.now().strftime("%d%m%Y"),
-            }
-            users_collection.update_one(
-                {"username": username},
-                {"$push": {"sleep_time": entry}}
-            )
-            return True
-        case "blood_pressure":
-            entry = {
-                **data,
-                "date": datetime.now().strftime("%d%m%Y"),
-            }
-            users_collection.update_one(
-                {"username": username},
-                {"$push": {"blood_pressure": entry}}
-            )
-            return True
-        case "mood_checkin":
-            entry = {
-                **data,
-                "date": datetime.now().strftime("%d%m%Y"),
-            }
-            users_collection.update_one(
-                {"username": username},
-                {"$push": {"mood_checkin": entry}}
-            )
-            return True
-        case "blood_oxygen":
-            entry = {
-                **data,
-                "date": datetime.now().strftime("%d%m%Y"),
-            }
-            users_collection.update_one(
-                {"username": username},
-                {"$push": {"blood_oxygen": entry}}
-            )
-            return True
-        case "blood_glucose":
-            entry = {
-                **data,
-                "date": datetime.now().strftime("%d%m%Y"),
-            }
-            users_collection.update_one(
-                {"username": username},
-                {"$push": {"blood_glucose": entry}}
-            )
-            return True
-        case "resting_heart_rate":
-            entry = {
-                **data,
-                "date": datetime.now().strftime("%d%m%Y"),
-            }
-            users_collection.update_one(
-                {"username": username},
-                {"$push": {"resting_heart_rate": entry}}
-            )
-            return True
-        case _:
-            raise ValueError("Invalid category")
+def _reported_value(indicator_key, entry):
+    if indicator_key == "bp":
+        return {"sys": entry["sys"], "dia": entry["dia"]}
+    if indicator_key == "urine":
+        if "color_alert" in entry:
+            return {"color_alert": entry["color_alert"]}
+        return {
+            key: value
+            for key, value in entry.items()
+            if key != "source"
+        }
+    if indicator_key == "bone_urine":
+        return {
+            key: value
+            for key, value in entry.items()
+            if key != "source"
+        }
+    if indicator_key == "fluid_ml":
+        return entry["v"]
+    return {
+        key: value
+        for key, value in entry.items()
+        if key != "source"
+    }
+

@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Unit Conversion — 11:56{% endblock %}
+{% block body_class %}conversion{% endblock %}
+{% block page_class %}page--conversion{% endblock %}
+
+{% block content %}
+<div class="auth__bg" aria-hidden="true">
+  <img src="{{ url_for('static', filename='assets/starfield.jpg') }}" alt="">
+</div>
+
+<main class="conversion-content">
+  <h1>Unit Conversion</h1>
+  <p class="conversion-content__intro">Convert height and weight measurements between metric and imperial units.</p>
+
+  <div class="conversion-grid">
+    <section class="conversion-card" aria-labelledby="height-conversion-title">
+      <h2 id="height-conversion-title">Height</h2>
+      <p>Feet and inches to centimetres</p>
+      <form class="conversion-form" data-conversion="height">
+        <label>
+          <span>Feet</span>
+          <input type="number" name="feet" min="0" step="any" inputmode="decimal" required>
+        </label>
+        <label>
+          <span>Inches</span>
+          <input type="number" name="inches" min="0" step="any" value="0" inputmode="decimal" required>
+        </label>
+        <button class="btn btn--sm" type="submit">CONVERT TO CM</button>
+        <p class="conversion-result" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <section class="conversion-card" aria-labelledby="weight-conversion-title">
+      <h2 id="weight-conversion-title">Weight</h2>
+      <p>Pounds to kilograms</p>
+      <form class="conversion-form" data-conversion="weight">
+        <label>
+          <span>Pounds</span>
+          <input type="number" name="pounds" min="0" step="any" inputmode="decimal" required>
+        </label>
+        <button class="btn btn--sm" type="submit">CONVERT TO KG</button>
+        <p class="conversion-result" aria-live="polite"></p>
+      </form>
+    </section>
+  </div>
+</main>
+
+<script>
+  document.querySelectorAll(".conversion-form").forEach((form) => {
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const result = form.querySelector(".conversion-result");
+      const values = Object.fromEntries(new FormData(form));
+
+      try {
+        const response = await fetch("{{ url_for('api.unit_conversion') }}", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ conversion: form.dataset.conversion, ...values })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Conversion failed.");
+        result.textContent = data.result;
+      } catch (error) {
+        result.textContent = error.message || "Unable to convert these values.";
+      }
+    });
+  });
+</script>
+{% endblock %}

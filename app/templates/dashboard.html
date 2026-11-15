@@ -1,1 +1,218 @@
-<p>Welcome, {{ username }}!</p>
+{% extends "base.html" %}
+
+{% block title %}Dashboard — 11:56{% endblock %}
+{% block body_class %}dashboard{% endblock %}
+{% block page_class %}page--dashboard{% endblock %}
+
+{% block content %}
+<main class="dashboard">
+  <header class="dashboard__heading">
+    <p class="dashboard__eyebrow">CREW WELLNESS <span class="dashboard__demo">DEMO DATA · NOT SAVED</span></p>
+    <h1>{{ greeting }}, {{ username }}!</h1>
+    <p>Here’s your mission health snapshot.</p>
+  </header>
+
+  <section class="dashboard__overview" aria-label="Daily wellness overview">
+    <article class="dashboard-card dashboard-card--water">
+      <div class="water-card__header">
+        <div>
+          <p class="dashboard-card__eyebrow">HYDRATION</p>
+          <h2>Water intake</h2>
+        </div>
+        <output class="water-card__amount"><span id="water-amount">1,500</span> <span>ml</span></output>
+      </div>
+
+      <div class="water-card__body">
+        <div class="water-figure">
+          <svg viewBox="0 0 180 300" role="img" aria-labelledby="water-figure-title">
+            <title id="water-figure-title">Water level in a human silhouette</title>
+            <defs>
+              <clipPath id="person-clip">
+                <path d="M90 13c-25 0-40 19-40 44 0 19 8 34 21 43l-4 23-39 17c-13 6-21 19-23 35L0 286h180l-5-111c-1-16-10-29-23-35l-39-17-4-23c13-9 21-24 21-43 0-25-15-44-40-44Z"/>
+              </clipPath>
+              <linearGradient id="water-gradient" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0" stop-color="#87e5f4"/>
+                <stop offset="1" stop-color="#287dca"/>
+              </linearGradient>
+            </defs>
+            <path class="water-figure__outline" d="M90 13c-25 0-40 19-40 44 0 19 8 34 21 43l-4 23-39 17c-13 6-21 19-23 35L0 286h180l-5-111c-1-16-10-29-23-35l-39-17-4-23c13-9 21-24 21-43 0-25-15-44-40-44Z"/>
+            <g clip-path="url(#person-clip)">
+              <rect id="water-fill" x="0" y="156" width="180" height="144" fill="url(#water-gradient)"/>
+              <path id="water-wave" d="M0 156 Q22 146 45 156 T90 156 T135 156 T180 156 V170 H0Z" fill="#b5f4fb" opacity=".8"/>
+            </g>
+          </svg>
+        </div>
+        <div class="water-level">
+          <label for="water-level">Adjust water level</label>
+          <input id="water-level" type="range" min="0" max="100" value="50">
+          <output id="water-level-output" for="water-level">50%</output>
+          <p>Daily goal <strong>2,500 ml</strong></p>
+        </div>
+      </div>
+
+      <div class="quick-actions" aria-label="Water intake quick actions">
+        <button type="button" class="quick-action" data-action="water" data-amount="-250" aria-label="Remove 250 millilitres of water">− 250 ml</button>
+        <button type="button" class="quick-action" data-action="water" data-amount="250" aria-label="Add 250 millilitres of water">+ 250 ml</button>
+      </div>
+    </article>
+
+    <div class="dashboard__side">
+      <article class="dashboard-card mission-card">
+        <div>
+          <p class="dashboard-card__eyebrow">MISSION CONTROL</p>
+          <h2>Days remaining</h2>
+          <p class="mission-card__count"><span id="mission-days">180</span><small>days</small></p>
+        </div>
+      </article>
+
+      <article class="dashboard-card exercise-card">
+        <div>
+          <p class="dashboard-card__eyebrow">MOVEMENT</p>
+          <h2>Exercise</h2>
+          <p class="exercise-card__amount"><span id="exercise-minutes">30</span><small>min today</small></p>
+        </div>
+        <div class="quick-actions" aria-label="Exercise quick actions">
+          <button type="button" class="quick-action" data-action="exercise" data-amount="-15" aria-label="Remove 15 exercise minutes">− 15 min</button>
+          <button type="button" class="quick-action" data-action="exercise" data-amount="15" aria-label="Add 15 exercise minutes">+ 15 min</button>
+        </div>
+      </article>
+
+      <article class="dashboard-card streak-card">
+        <span class="streak-card__flame" aria-hidden="true">🔥</span>
+        <div>
+          <p class="dashboard-card__eyebrow">CONSISTENCY</p>
+          <h2><span id="streak-days">7</span> day streak</h2>
+          <p>Sample streak · keep logging daily.</p>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="dashboard-card sleep-card" aria-labelledby="sleep-title">
+    <div class="sleep-card__heading">
+      <div>
+        <p class="dashboard-card__eyebrow">RECOVERY</p>
+        <h2 id="sleep-title">Sleep this week</h2>
+      </div>
+      <p>Hours per night <span>·</span> Sample data</p>
+    </div>
+    <div class="sleep-chart" role="img" aria-label="Placeholder sleep hours from Monday through Sunday">
+      {% for day, hours in [('Monday', 7.2), ('Tuesday', 6.5), ('Wednesday', 8), ('Thursday', 7.6), ('Friday', 6.9), ('Saturday', 8.4), ('Sunday', 7.5)] %}
+        <div class="sleep-chart__day" data-day-index="{{ loop.index0 }}">
+          <span class="sleep-chart__hours">{{ hours }}h</span>
+          <div class="sleep-chart__track"><div class="sleep-chart__bar" style="--sleep: {{ hours / 10 * 100 }}%"></div></div>
+          <span class="sleep-chart__label">{{ day[:3] }}</span>
+          <span class="sleep-chart__marker" hidden></span>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+</main>
+
+<script>
+  (() => {
+    let savedSettings = {};
+    try {
+      const saved = localStorage.getItem("astronomads_user_settings");
+      if (saved) savedSettings = JSON.parse(saved);
+    } catch (e) {}
+
+    const waterTarget = Number(savedSettings.water_target) || 2500;
+    let water = 1500;
+    let exercise = 30;
+
+    const waterAmount = document.getElementById("water-amount");
+    const waterSlider = document.getElementById("water-level");
+    const waterOutput = document.getElementById("water-level-output");
+    const waterFill = document.getElementById("water-fill");
+    const waterWave = document.getElementById("water-wave");
+
+    const renderWater = () => {
+      const percent = Math.min(100, Math.round(water / waterTarget * 100));
+      waterAmount.textContent = water.toLocaleString();
+      waterSlider.value = percent;
+      waterOutput.textContent = `${percent}%`;
+      const y = 286 - percent * 2.73;
+      waterFill.setAttribute("y", y);
+      waterFill.setAttribute("height", 300 - y);
+      waterWave.setAttribute("transform", `translate(0 ${y - 156})`);
+    };
+
+    document.querySelectorAll(".quick-action").forEach((button) => {
+      button.addEventListener("click", () => {
+        const change = Number(button.dataset.amount);
+        if (button.dataset.action === "water") {
+          water = Math.max(0, water + change);
+          renderWater();
+        } else {
+          exercise = Math.max(0, exercise + change);
+          document.getElementById("exercise-minutes").textContent = exercise;
+        }
+      });
+    });
+
+    waterSlider.addEventListener("input", () => {
+      water = Math.round(Number(waterSlider.value) / 100 * waterTarget);
+      renderWater();
+    });
+
+    const updateMissionCountdown = () => {
+      const launchDateStr = savedSettings.launch_date || savedSettings.mission_start || "{{ today_gmt }}";
+      const duration = Number(savedSettings.mission_length) || 180;
+      const start = new Date(`${launchDateStr}T00:00:00Z`);
+      if (Number.isNaN(start.getTime()) || !Number.isFinite(duration) || duration < 1) {
+        document.getElementById("mission-days").textContent = "180";
+        return;
+      }
+      const end = start.getTime() + duration * 86400000;
+      const now = new Date();
+      const todayUtc = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+      const daysRemaining = Math.max(0, Math.ceil((end - todayUtc) / 86400000));
+      document.getElementById("mission-days").textContent = daysRemaining;
+    };
+    updateMissionCountdown();
+
+    const today = new Date().getDay();
+    const todayIndex = (today + 6) % 7;
+    const yesterdayIndex = (todayIndex + 6) % 7;
+    document.querySelectorAll(".sleep-chart__day").forEach((day) => {
+      const index = Number(day.dataset.dayIndex);
+      const marker = day.querySelector(".sleep-chart__marker");
+      if (index === todayIndex || index === yesterdayIndex) {
+        day.classList.add(index === todayIndex ? "is-today" : "is-yesterday");
+        marker.hidden = false;
+        marker.textContent = index === todayIndex ? "Today" : "Yesterday";
+      }
+    });
+
+    const updateEnvironment = () => {
+      const val = (savedSettings.environment || "{{ environment|default('iss') }}").toLowerCase();
+      let env = "iss";
+      let bgUrl = "assets/iss1.png";
+      if (val.includes("mars")) {
+        env = "mars";
+        bgUrl = "assets/mars.jpg";
+      } else if (val.includes("moon")) {
+        env = "moon";
+        bgUrl = "assets/moon.png";
+      } else {
+        env = "iss";
+        bgUrl = "assets/iss1.png";
+      }
+      const pageEl = document.querySelector(".page--dashboard") || document.querySelector(".page");
+      if (pageEl) {
+        pageEl.setAttribute("data-environment", env);
+        pageEl.classList.remove("env-iss", "env-mars", "env-moon");
+        pageEl.classList.add(`env-${env}`);
+      }
+      document.body.setAttribute("data-environment", env);
+      document.body.classList.remove("env-iss", "env-mars", "env-moon");
+      document.body.classList.add(`env-${env}`);
+      document.documentElement.style.setProperty("--dashboard-bg", `url('/static/${bgUrl}')`);
+    };
+    updateEnvironment();
+
+    renderWater();
+  })();
+</script>
+{% endblock %}

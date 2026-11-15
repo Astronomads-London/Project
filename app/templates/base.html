@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}11:56{% endblock %}</title>
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='assets/black/favicon.ico') }}" media="(prefers-color-scheme: light)">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='assets/black/favicon-32x32.png') }}" media="(prefers-color-scheme: light)">
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='assets/black/favicon-16x16.png') }}" media="(prefers-color-scheme: light)">
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='assets/black/apple-touch-icon.png') }}" media="(prefers-color-scheme: light)">
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='assets/white/favicon.ico') }}" media="(prefers-color-scheme: dark)">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='assets/white/favicon-32x32.png') }}" media="(prefers-color-scheme: dark)">
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='assets/white/favicon-16x16.png') }}" media="(prefers-color-scheme: dark)">
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='assets/white/apple-touch-icon.png') }}" media="(prefers-color-scheme: dark)">
+  <script>
+    (function() {
+      function updateFavicon() {
+        var isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var theme = isDark ? 'white' : 'black';
+        var links = document.querySelectorAll("link[rel*='icon'], link[rel='apple-touch-icon']");
+        links.forEach(function(link) {
+          if (link.href && (link.href.indexOf('/assets/black/') !== -1 || link.href.indexOf('/assets/white/') !== -1)) {
+            link.href = link.href.replace(/\/assets\/(black|white)\//, '/assets/' + theme + '/');
+          }
+        });
+      }
+
+      if (window.matchMedia) {
+        var matcher = window.matchMedia('(prefers-color-scheme: dark)');
+        if (matcher.addEventListener) {
+          matcher.addEventListener('change', updateFavicon);
+        } else if (matcher.addListener) {
+          matcher.addListener(updateFavicon);
+        }
+      }
+      updateFavicon();
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anonymous+Pro&family=Intel+One+Mono:wght@600&family=Italianno&family=Inter&family=Jaro&family=JetBrains+Mono&family=Kiwi+Maru&family=Konkhmer+Sleokchher&family=M+PLUS+1p:wght@700&family=Montserrat&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  {% set current_page = active_page|default(request.endpoint) %}
+  <div class="page {% block page_class %}{% endblock %}">
+    {% block nav %}
+    <header class="nav">
+      <a class="nav__logo" href="{{ url_for('main.index') }}" aria-label="Astronomads home">11<br>56</a>
+      <nav class="nav__links" aria-label="Main">
+        {% set is_conversion = current_page == 'conversion' or request.endpoint == 'main.conversion' or request.path in ['/conversion', '/unit_conversion', '/unitconversion'] %}
+        {% set is_dashboard = current_page == 'dashboard' or request.endpoint == 'main.dashboard' or request.path == '/dashboard' %}
+        {% set is_settings = current_page == 'settings' or request.endpoint == 'main.settings' or request.path == '/settings' %}
+        {% set is_login = current_page in ['login', 'register', 'signup'] or request.endpoint in ['main.login', 'main.register', 'main.signup'] or request.path in ['/login', '/register', '/signup'] %}
+        {% set is_learn = request.endpoint in ['learn.learn_index', 'learn.learn_page'] or request.path.startswith('/learn') %}
+        <a class="nav__link nav__link--learn{% if is_learn %} nav__link--active{% endif %}" href="{{ url_for('learn.learn_index') }}" {% if is_learn %}aria-current="page"{% endif %}>LEARN</a>
+        <a class="nav__link nav__link--conversion{% if is_conversion %} nav__link--active{% endif %}" href="{{ url_for('main.unitconversion') }}" {% if is_conversion %}aria-current="page"{% endif %}>UNIT CONVERSION</a>
+        {% if session.get('username') %}
+          <a class="nav__link nav__link--dashboard{% if is_dashboard %} nav__link--active{% endif %}" href="{{ url_for('main.dashboard') }}" {% if is_dashboard %}aria-current="page"{% endif %}>DASHBOARD</a>
+          <a class="nav__link nav__link--settings{% if is_settings %} nav__link--active{% endif %}" href="{{ url_for('main.settings') }}" {% if is_settings %}aria-current="page"{% endif %}>SETTINGS</a>
+          <a class="nav__link nav__link--login" href="{{ url_for('api.logout') }}">LOG OUT</a>
+        {% else %}
+          <a class="nav__link nav__link--login{% if is_login %} nav__link--active{% endif %}" href="{{ url_for('main.login') }}" {% if is_login %}aria-current="page"{% endif %}>LOG IN</a>
+        {% endif %}
+      </nav>
+    </header>
+    {% endblock %}
+
+    {% block content %}{% endblock %}
+
+    {% block footer %}
+    <footer class="footer">
+      <div class="footer__inner">
+        <a class="footer__link" href="/policies/privacy">Privacy Policy</a>
+        <p class="footer__copyright">&copy; 2026 Astronomads</p>
+      </div>
+    </footer>
+    {% endblock %}
+  </div>
+</body>
+</html>

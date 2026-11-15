@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Home — 11:56{% endblock %}
+{% block body_class %}home{% endblock %}
+{% block page_class %}page--home{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <img class="hero__bg" src="{{ url_for('static', filename='assets/hero-nebula.png') }}" alt="">
+  <h1 class="hero__title">
+    <span class="hero__healthcare">HEALTHCARE</span>
+    <span class="hero__above">ABOVE</span>
+    <span class="hero__and">AND</span>
+    <span class="hero__beyond">BEYOND</span>
+  </h1>
+  <a class="hero__scroll" href="#topics">
+    <span>EXPLORE</span>
+    <span class="hero__scroll-arrow" aria-hidden="true">↓</span>
+  </a>
+</section>
+
+<section class="topics" id="topics">
+  <div class="topics__bg" aria-hidden="true">
+    <img src="{{ url_for('static', filename='assets/night-sky.jpg') }}" alt="">
+  </div>
+
+  <a class="big-link big-link--arrow" href="{{ url_for('learn.learn_page', slug='bone-strength') }}">
+    <img class="big-link__shape" src="{{ url_for('static', filename='assets/link-arrow.svg') }}" alt="">
+    <span class="big-link__label">BONE STRENGTH</span>
+  </a>
+  <a class="big-link big-link--plain" href="{{ url_for('learn.learn_page', slug='mental-health') }}">
+    <img class="big-link__shape" src="{{ url_for('static', filename='assets/link-plain.svg') }}" alt="">
+    <span class="big-link__label">MENTAL HEALTH</span>
+  </a>
+  <a class="big-link big-link--arrow" href="{{ url_for('learn.learn_page', slug='cardiovascular') }}">
+    <img class="big-link__shape" src="{{ url_for('static', filename='assets/link-arrow.svg') }}" alt="">
+    <span class="big-link__label">CARDIOVASCULAR</span>
+  </a>
+  <a class="big-link big-link--plain" href="{{ url_for('learn.learn_page', slug='immune-system') }}">
+    <img class="big-link__shape" src="{{ url_for('static', filename='assets/link-plain.svg') }}" alt="">
+    <span class="big-link__label">IMMUNE SYSTEM</span>
+  </a>
+</section>
+{% endblock %}
