@@ -39,11 +39,10 @@ api_bp = Blueprint("api", __name__)
 
 TEMP_REFCODE = "123456"  # Temporary referral code for testing purposes
 PVT_OUTCOMES = {"commission", "false_start", "response", "lapse", "omission", "truncated"}
-URINE_FIELDS = ("ca", "ntx", "ctx1", "pyridinoline")
+URINE_FIELDS = ("ca", "ntx", "pyridinoline")
 URINE_FIELD_LABELS = {
     "ca": "Calcium (CA)",
     "ntx": "N-telopeptide (NTX)",
-    "ctx1": "C-telopeptide-1 (CTX1)",
     "pyridinoline": "Pyridinoline",
 }
 
@@ -76,6 +75,10 @@ def urine_check():
     else:
         return jsonify(error="A valid sex is required in your profile to run this check."), 400
 
+    age = db.get_user_age(username)
+    if age is None:
+        return jsonify(error="A valid birthday is required in your profile to run this check."), 400
+
     values = {}
     for field in URINE_FIELDS:
         value = data.get(field)
@@ -93,9 +96,9 @@ def urine_check():
         sex_code,
         values["ca"],
         values["ntx"],
-        values["ctx1"],
         values["pyridinoline"],
         period,
+        age,
     )
     failed_tests = [
         URINE_FIELD_LABELS[field]

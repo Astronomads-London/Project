@@ -62,6 +62,11 @@
     {% endif %}
   </section>
 
+  <ul class="metric-chart-legend" aria-label="Chart reading status">
+    <li><span class="metric-chart-legend__swatch metric-chart-legend__swatch--normal" aria-hidden="true"></span>Normal</li>
+    <li><span class="metric-chart-legend__swatch metric-chart-legend__swatch--concerning" aria-hidden="true"></span>Concerning</li>
+    <li><span class="metric-chart-legend__swatch metric-chart-legend__swatch--critical" aria-hidden="true"></span>Critical</li>
+  </ul>
   <section class="metrics-grid" aria-label="Health metrics over the last seven days">
     {% for chart in charts %}
       <article class="dashboard-card metric-card" aria-labelledby="metric-title-{{ chart.field }}">
@@ -155,7 +160,7 @@
   </section>
 </main>
 
-<script src="{{ url_for('static', filename='metric-charts.js') }}"></script>
+<script src="{{ url_for('static', filename='metric-charts.js', v='20261115-chart-status') }}"></script>
 <script>
   renderMetricCharts({{ charts|tojson }});
 </script>

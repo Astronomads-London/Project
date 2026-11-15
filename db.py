@@ -1,5 +1,6 @@
 import os
 from datetime import datetime, timezone, timedelta
+from typing import Optional
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 from pymongo import ASCENDING
@@ -351,7 +352,7 @@ def save_pvt_result(username: str, started_at: datetime, trials: list, scores: d
         print(f"❌ Error occurred while saving PVT results: {e}")
         return False
 
-def get_user_age(username: str) -> int:
+def get_user_age(username: str) -> Optional[int]:
     try:
         user = users_collection.find_one({"username": username}, {"birthday": 1, "_id": 0})
         if user and "birthday" in user:

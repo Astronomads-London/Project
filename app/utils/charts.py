@@ -1,6 +1,8 @@
 """Seven-day chart data shared by the astronaut and flight surgeon dashboards."""
 from datetime import timedelta
 
+from app.utils.vital_signs import reading_status
+
 CHART_DAYS = 7
 
 # (field, title, unit, account field holding the target, target if unset)
@@ -26,6 +28,7 @@ def build_charts(records, user, today):
     records_by_date = {record.get("date"): record for record in records}
     charts = []
     for field, title, unit, target_field, default_target in _CHART_DEFINITIONS:
+        target = user.get(target_field, default_target) if target_field else None
         points = []
         for day in dates:
             value = records_by_date.get(day.isoformat(), {}).get(field)
@@ -36,12 +39,16 @@ def build_charts(records, user, today):
                     value = float(value)
                 except (TypeError, ValueError):
                     value = None
-            points.append({"label": day.strftime("%a"), "value": value})
+            points.append({
+                "label": day.strftime("%a"),
+                "value": value,
+                "status": reading_status(field, value, target if field == "water" else None),
+            })
         charts.append({
             "field": field,
             "title": title,
             "unit": unit,
-            "target": user.get(target_field, default_target) if target_field else None,
+            "target": target,
             "points": points,
         })
     return charts
