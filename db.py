@@ -230,3 +230,18 @@ def save_pvt_result(username: str, started_at: datetime, trials: list, scores: d
     except Exception as e:
         print(f"❌ Error occurred while saving PVT results: {e}")
         return False
+
+def get_user_age(username: str) -> int:
+    try:
+        user = users_collection.find_one({"username": username}, {"birthday": 1, "_id": 0})
+        if user and "birthday" in user:
+            birthday = datetime.strptime(user["birthday"], "%Y-%m-%d")
+            today = datetime.now(timezone.utc)
+            age = today.year - birthday.year - ((today.month, today.day) < (birthday.month, birthday.day))
+            return age
+        else:
+            print(f"❌ User {username} not found or birthday not set.")
+            return None
+    except Exception as e:
+        print(f"❌ Error occurred while calculating user age: {e}")
+        return None
