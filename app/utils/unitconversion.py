@@ -22,6 +22,15 @@ def pounds_to_kg(pounds):
     """Convert pounds to kilograms."""
     return pounds * KG_PER_POUND
 
+def cm_to_feet_and_inches(cm):
+    """Convert centimetres to feet and inches."""
+    feet = cm // CM_PER_FOOT
+    inches = (cm - feet * CM_PER_FOOT) / CM_PER_INCH
+    return (feet, round(inches, 2))
+
+def kg_to_pounds(kg):
+    """Convert kilograms to pounds."""
+    return round(kg / KG_PER_POUND, 2)
 
 def ask_float(question):
     """Keep asking until the user types a number that isn't negative."""
