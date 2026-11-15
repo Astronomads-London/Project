@@ -37,6 +37,17 @@ users_collection = database["Users"]
 reported_data_collection = database["ReportedData"]
 pvt_results_collection = database["PVTResults"]
 
+reported_data_collection.create_index(
+    [("username", ASCENDING), ("date", ASCENDING)],
+    unique=True,
+    name="username_1_date_1",
+)
+if any(
+    index["name"] == "crew_id_1_date_1"
+    for index in reported_data_collection.list_indexes()
+):
+    reported_data_collection.drop_index("crew_id_1_date_1")
+
 
 
 # Helper Functions
