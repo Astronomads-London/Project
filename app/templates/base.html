@@ -51,6 +51,7 @@
       <nav class="nav__links" aria-label="Main">
         {% set is_conversion = current_page == 'conversion' or request.endpoint == 'main.conversion' or request.path in ['/conversion', '/unit_conversion', '/unitconversion'] %}
         {% set is_dashboard = current_page == 'dashboard' or request.endpoint == 'main.dashboard' or request.path == '/dashboard' %}
+        {% set is_today = current_page == 'today' or request.endpoint == 'main.today_data' or request.path in ['/today', '/edit-today'] %}
         {% set is_settings = current_page == 'settings' or request.endpoint == 'main.settings' or request.path == '/settings' %}
         {% set is_login = current_page in ['login', 'register', 'signup'] or request.endpoint in ['main.login', 'main.register', 'main.signup'] or request.path in ['/login', '/register', '/signup'] %}
         {% set is_learn = request.endpoint in ['learn.learn_index', 'learn.learn_page'] or request.path.startswith('/learn') %}
@@ -58,6 +59,7 @@
         <a class="nav__link nav__link--conversion{% if is_conversion %} nav__link--active{% endif %}" href="{{ url_for('main.unitconversion') }}" {% if is_conversion %}aria-current="page"{% endif %}>UNIT CONVERSION</a>
         {% if session.get('username') %}
           <a class="nav__link nav__link--dashboard{% if is_dashboard %} nav__link--active{% endif %}" href="{{ url_for('main.dashboard') }}" {% if is_dashboard %}aria-current="page"{% endif %}>DASHBOARD</a>
+          <a class="nav__link nav__link--today{% if is_today %} nav__link--active{% endif %}" href="{{ url_for('main.today_data') }}" {% if is_today %}aria-current="page"{% endif %}>LOG TODAY</a>
           <a class="nav__link nav__link--settings{% if is_settings %} nav__link--active{% endif %}" href="{{ url_for('main.settings') }}" {% if is_settings %}aria-current="page"{% endif %}>SETTINGS</a>
           <a class="nav__link nav__link--login" href="{{ url_for('api.logout') }}">LOG OUT</a>
         {% else %}

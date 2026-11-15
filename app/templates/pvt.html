@@ -1,0 +1,331 @@
+{% extends "base.html" %}
+
+{% block title %}PVT-B · 11:56{% endblock %}
+{% block body_class %}pvt{% endblock %}
+{% block page_class %}page--pvt{% endblock %}
+
+{% block content %}
+<main class="pvt-page">
+  <header class="pvt-page__heading">
+    <p class="dashboard__eyebrow">CREW WELLNESS · ALERTNESS</p>
+    <h1>Brief Psychomotor Vigilance Test</h1>
+    <p>Respond as soon as the yellow counter appears. The test lasts three minutes.</p>
+  </header>
+
+  <section class="pvt-shell" id="pvt-shell" aria-label="PVT-B test">
+    <div class="pvt-instructions" id="pvt-instructions">
+      <h2>Before you begin</h2>
+      <ul>
+        <li>Wait for the yellow counter in the red box, then press the box or Space as quickly as you can.</li>
+        <li>Pressing while the box is blank is recorded as a false start.</li>
+        <li>Responses under 100 ms are marked as too early; responses over 500 ms are lapses.</li>
+        <li>If you do not respond, the counter stops after 30 seconds. Stay focused until the test ends.</li>
+      </ul>
+      <p class="pvt-disclaimer">This alertness task is for observational research and is not a medical assessment.</p>
+      <button class="pvt-button" id="pvt-start" type="button">Start 3-minute test</button>
+    </div>
+
+    <div class="pvt-session" id="pvt-session" hidden>
+      <div class="pvt-progress">
+        <span>TIME REMAINING</span>
+        <output id="pvt-remaining" aria-live="off">03:00</output>
+      </div>
+      <button class="pvt-stimulus" id="pvt-stimulus" type="button" aria-label="Wait for the counter, then press as quickly as possible" disabled>
+        <span class="pvt-counter" id="pvt-counter" aria-live="off" hidden>0.00</span>
+        <span class="pvt-box-message" id="pvt-box-message">Wait for the number</span>
+      </button>
+      <p class="pvt-phase" id="pvt-phase" role="status" aria-live="polite">Ready</p>
+    </div>
+
+    <section class="pvt-results" id="pvt-results" aria-labelledby="pvt-results-title" hidden>
+      <p class="dashboard__eyebrow">TEST COMPLETE</p>
+      <h2 id="pvt-results-title">Your results</h2>
+      <dl class="pvt-score-grid" id="pvt-score-grid"></dl>
+      <p class="pvt-save-status" id="pvt-save-status" role="status" aria-live="polite"></p>
+      <button class="pvt-button pvt-button--secondary" id="pvt-retry-save" type="button" hidden>Retry saving results</button>
+      <a class="pvt-back-link" href="{{ url_for('main.dashboard') }}">Return to dashboard</a>
+    </section>
+  </section>
+</main>
+
+<script>
+  (() => {
+    const durationMs = 180000;
+    const maxForeperiodMs = 3000;
+    const responseTimeoutMs = 30000;
+    const feedbackMs = 1000;
+    const shell = document.getElementById("pvt-shell");
+    const instructions = document.getElementById("pvt-instructions");
+    const sessionPanel = document.getElementById("pvt-session");
+    const stimulusButton = document.getElementById("pvt-stimulus");
+    const counter = document.getElementById("pvt-counter");
+    const boxMessage = document.getElementById("pvt-box-message");
+    const remaining = document.getElementById("pvt-remaining");
+    const phase = document.getElementById("pvt-phase");
+    const resultsPanel = document.getElementById("pvt-results");
+    const scoreGrid = document.getElementById("pvt-score-grid");
+    const saveStatus = document.getElementById("pvt-save-status");
+    const retrySave = document.getElementById("pvt-retry-save");
+    const startButton = document.getElementById("pvt-start");
+    let running = false;
+    let runStartedAt = 0;
+    let startedAtIso = null;
+    let timerId = null;
+    let stimulusTimerId = null;
+    let state = "ready";
+    let currentTrial = null;
+    let trialNumber = 0;
+    let trials = [];
+    let feedbackEndsAt = 0;
+    let pendingPayload = null;
+
+    const elapsedMs = (now = performance.now()) => Math.min(durationMs, now - runStartedAt);
+    const formatRemaining = (timeMs) => {
+      const seconds = Math.ceil(timeMs / 1000);
+      return `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
+    };
+    const showCounter = (milliseconds) => {
+      counter.hidden = false;
+      counter.textContent = (milliseconds / 1000).toFixed(2);
+    };
+
+    function finishTrial(outcome, now, reactionTime = null) {
+      if (!currentTrial) return;
+      window.clearTimeout(stimulusTimerId);
+      stimulusTimerId = null;
+      currentTrial.stimulus_onset_ms = currentTrial.stimulus_onset_perf === null
+        ? null
+        : currentTrial.stimulus_onset_perf - runStartedAt;
+      currentTrial.response_ms = outcome === "omission" ? null : elapsedMs(now);
+      currentTrial.reaction_time_ms = reactionTime;
+      currentTrial.outcome = outcome;
+      delete currentTrial.stimulus_onset_perf;
+      trials.push(currentTrial);
+      currentTrial = null;
+      state = "feedback";
+      feedbackEndsAt = now + feedbackMs;
+      stimulusButton.disabled = true;
+
+      if (outcome === "commission") {
+        showCounter(0);
+        boxMessage.textContent = "TOO EARLY";
+        phase.textContent = "False start recorded. Wait for the next counter.";
+      } else if (outcome === "omission") {
+        showCounter(responseTimeoutMs);
+        boxMessage.textContent = "NO RESPONSE";
+        phase.textContent = "No response within 30 seconds.";
+      } else {
+        showCounter(reactionTime);
+        boxMessage.textContent = outcome === "false_start"
+          ? "TOO EARLY"
+          : outcome === "lapse" ? "LAPSE" : "RECORDED";
+        phase.textContent = outcome === "false_start"
+          ? "Response under 100 ms; marked as too early."
+          : outcome === "lapse" ? "Response over 500 ms; counted as a lapse." : "Response recorded.";
+      }
+    }
+
+    function startTrial(now) {
+      if (!running || elapsedMs(now) >= durationMs) return;
+      trialNumber += 1;
+      currentTrial = {
+        trial_number: trialNumber,
+        trial_start_ms: elapsedMs(now),
+        foreperiod_ms: Math.floor(Math.random() * (maxForeperiodMs + 1)),
+        stimulus_onset_perf: null
+      };
+      state = "delay";
+      stimulusButton.disabled = false;
+      counter.hidden = true;
+      boxMessage.textContent = "Wait for the number";
+      phase.textContent = "Stay ready.";
+      if (currentTrial.foreperiod_ms === 0) {
+        showStimulus(now);
+      } else {
+        stimulusTimerId = window.setTimeout(
+          () => showStimulus(performance.now()),
+          currentTrial.foreperiod_ms
+        );
+      }
+    }
+
+    function showStimulus(now) {
+      if (!running || state !== "delay" || !currentTrial) return;
+      stimulusTimerId = null;
+      if (now - runStartedAt >= durationMs) {
+        finishRun();
+        return;
+      }
+      currentTrial.stimulus_onset_perf = now;
+      currentTrial.stimulus_onset_ms = elapsedMs(now);
+      state = "stimulus";
+      counter.hidden = false;
+      showCounter(0);
+      boxMessage.textContent = "Press now";
+      phase.textContent = "Respond as quickly as you can.";
+    }
+
+    function finishRun() {
+      if (!running) return;
+      const now = runStartedAt + durationMs;
+      if (currentTrial) {
+        trials.push({
+          trial_number: currentTrial.trial_number,
+          trial_start_ms: currentTrial.trial_start_ms,
+          foreperiod_ms: currentTrial.foreperiod_ms,
+          stimulus_onset_ms: currentTrial.stimulus_onset_perf === null
+            ? null
+            : currentTrial.stimulus_onset_perf - runStartedAt,
+          response_ms: null,
+          reaction_time_ms: null,
+          outcome: "truncated"
+        });
+        currentTrial = null;
+      }
+      running = false;
+      state = "finished";
+      window.clearInterval(timerId);
+      window.clearTimeout(stimulusTimerId);
+      stimulusButton.disabled = true;
+      sessionPanel.hidden = true;
+      instructions.hidden = true;
+      resultsPanel.hidden = false;
+      remaining.textContent = "00:00";
+      pendingPayload = {
+        started_at: startedAtIso,
+        duration_ms: durationMs,
+        trials: trials.map((trial) => ({
+          ...trial,
+          stimulus_onset_ms: trial.stimulus_onset_ms === null
+            ? null
+            : Math.round(trial.stimulus_onset_ms),
+          trial_start_ms: Math.round(trial.trial_start_ms),
+          response_ms: trial.response_ms === null ? null : Math.round(trial.response_ms),
+          reaction_time_ms: trial.reaction_time_ms === null ? null : Math.round(trial.reaction_time_ms)
+        }))
+      };
+
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(() => {});
+      }
+      saveResults();
+    }
+
+    function tick() {
+      if (!running) return;
+      const now = performance.now();
+      const elapsed = now - runStartedAt;
+      if (elapsed >= durationMs) {
+        finishRun();
+        return;
+      }
+      remaining.textContent = formatRemaining(durationMs - elapsed);
+
+      if (state === "stimulus") {
+        const reactionTime = now - currentTrial.stimulus_onset_perf;
+        if (reactionTime >= responseTimeoutMs) {
+          finishTrial("omission", now);
+        } else {
+          showCounter(Math.floor(reactionTime / 50) * 50);
+        }
+      } else if (state === "feedback" && now >= feedbackEndsAt) {
+        startTrial(now);
+      }
+    }
+
+    function respond(now) {
+      if (!running || state === "feedback" || state === "finished" || state === "ready") return;
+      if (now - runStartedAt >= durationMs) {
+        finishRun();
+        return;
+      }
+      if (state === "delay") {
+        finishTrial("commission", now);
+        return;
+      }
+      if (state === "stimulus") {
+        const reactionTime = now - currentTrial.stimulus_onset_perf;
+        const outcome = reactionTime < 100
+          ? "false_start"
+          : reactionTime > 500 ? "lapse" : "response";
+        finishTrial(outcome, now, reactionTime);
+      }
+    }
+
+    async function saveResults() {
+      retrySave.hidden = true;
+      saveStatus.textContent = "Saving your results…";
+      try {
+        const response = await fetch("{{ url_for('api.save_pvt_results') }}", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Accept": "application/json" },
+          body: JSON.stringify(pendingPayload)
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "Could not save your results.");
+        renderScores(result.scores);
+        saveStatus.textContent = "Your results were saved.";
+      } catch (error) {
+        saveStatus.textContent = error.message || "Could not save your results.";
+        retrySave.hidden = false;
+      }
+    }
+
+    function renderScores(scores) {
+      const rows = [
+        ["Average response time", scores.average_response_time_ms === null ? "—" : `${Math.round(scores.average_response_time_ms)} ms`],
+        ["Lapses (including omissions)", scores.lapse_count],
+        ["Omissions", scores.omission_count],
+        ["Commissions", scores.commission_count],
+        ["False starts", scores.false_start_count],
+        ["Overall performance", scores.overall_performance_score === null ? "—" : `${Math.round(scores.overall_performance_score * 100)}%`],
+        ["Mean reciprocal RT", scores.mean_reciprocal_rt_per_second === null ? "—" : `${scores.mean_reciprocal_rt_per_second.toFixed(2)} 1/s`]
+      ];
+      scoreGrid.replaceChildren();
+      rows.forEach(([label, value]) => {
+        const term = document.createElement("dt");
+        term.textContent = label;
+        const definition = document.createElement("dd");
+        definition.textContent = value;
+        scoreGrid.append(term, definition);
+      });
+    }
+
+    startButton.addEventListener("click", () => {
+      if (running) return;
+      if (typeof shell.requestFullscreen === "function") {
+        shell.requestFullscreen().catch(() => {
+          phase.textContent = "Fullscreen is unavailable; the test will continue in this window.";
+        });
+      } else {
+        phase.textContent = "Fullscreen is unavailable; the test will continue in this window.";
+      }
+      instructions.hidden = true;
+      sessionPanel.hidden = false;
+      resultsPanel.hidden = true;
+      trials = [];
+      trialNumber = 0;
+      state = "ready";
+      runStartedAt = performance.now();
+      startedAtIso = new Date().toISOString();
+      running = true;
+      startTrial(runStartedAt);
+      stimulusButton.focus({ preventScroll: true });
+      timerId = window.setInterval(tick, 50);
+      tick();
+    });
+
+    stimulusButton.addEventListener("pointerdown", (event) => {
+      event.preventDefault();
+      respond(performance.now());
+    });
+    document.addEventListener("keydown", (event) => {
+      if ((event.code === "Space" || event.code === "Enter") && running) {
+        event.preventDefault();
+        if (!event.repeat) respond(performance.now());
+      }
+    });
+    retrySave.addEventListener("click", saveResults);
+  })();
+</script>
+{% endblock %}
