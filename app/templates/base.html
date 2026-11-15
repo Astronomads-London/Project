@@ -39,7 +39,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anonymous+Pro&family=Intel+One+Mono:wght@600&family=Italianno&family=Inter&family=Jaro&family=JetBrains+Mono&family=Kiwi+Maru&family=Konkhmer+Sleokchher&family=M+PLUS+1p:wght@700&family=Montserrat&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css', v='20261115-urine-check') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css', v='20261115-messages') }}">
   {% block extra_head %}{% endblock %}
 </head>
 <body class="{% block body_class %}{% endblock %}">
@@ -59,9 +59,17 @@
         <a class="nav__link nav__link--about{% if is_about %} nav__link--active{% endif %}" href="{{ url_for('main.aboutus') }}" {% if is_about %}aria-current="page"{% endif %}>ABOUT US</a>
         <a class="nav__link nav__link--learn{% if is_learn %} nav__link--active{% endif %}" href="{{ url_for('learn.learn_index') }}" {% if is_learn %}aria-current="page"{% endif %}>LEARN</a>
         <a class="nav__link nav__link--conversion{% if is_conversion %} nav__link--active{% endif %}" href="{{ url_for('main.unitconversion') }}" {% if is_conversion %}aria-current="page"{% endif %}>UNIT CONVERSION</a>
-        {% if session.get('username') %}
+        {% if session.get('username') and session.get('role') == 'flight_surgeon' %}
+          {% set is_treatment = request.path.startswith('/surgeon/treatment') %}
+          {% set is_surgeon = request.path.startswith('/surgeon') and not is_treatment %}
+          <a class="nav__link nav__link--dashboard{% if is_surgeon %} nav__link--active{% endif %}" href="{{ url_for('surgeon.crew') }}" {% if is_surgeon %}aria-current="page"{% endif %}>CREW DASHBOARD</a>
+          <a class="nav__link nav__link--treatment{% if is_treatment %} nav__link--active{% endif %}" href="{{ url_for('surgeon.treatment') }}" {% if is_treatment %}aria-current="page"{% endif %}>TREATMENT</a>
+          <a class="nav__link nav__link--login" href="{{ url_for('api.logout') }}">LOG OUT</a>
+        {% elif session.get('username') %}
           <a class="nav__link nav__link--dashboard{% if is_dashboard %} nav__link--active{% endif %}" href="{{ url_for('main.dashboard') }}" {% if is_dashboard %}aria-current="page"{% endif %}>DASHBOARD</a>
           <a class="nav__link nav__link--today{% if is_today %} nav__link--active{% endif %}" href="{{ url_for('main.today_data') }}" {% if is_today %}aria-current="page"{% endif %}>LOG TODAY</a>
+          {% set is_messages = request.path == '/messages' %}
+          <a class="nav__link nav__link--messages{% if is_messages %} nav__link--active{% endif %}" href="{{ url_for('main.messages') }}" {% if is_messages %}aria-current="page"{% endif %}>MESSAGES</a>
           <a class="nav__link nav__link--settings{% if is_settings %} nav__link--active{% endif %}" href="{{ url_for('main.settings') }}" {% if is_settings %}aria-current="page"{% endif %}>SETTINGS</a>
           <a class="nav__link nav__link--login" href="{{ url_for('api.logout') }}">LOG OUT</a>
         {% else %}
