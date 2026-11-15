@@ -46,7 +46,6 @@ Type I collagen makes up most of organic bone. When osteoclasts break down bone,
 
 
 ## Sources:
-> 1. National Institutes of Health (2023) - [Bone Health and Osteoporosis](https://www.niams.nih.gov/health-topics/bone-health-and-osteoporosis) [Accessed 14th November 2026]
-> 2. NASA (n.d.) Risk of Spaceflight-Induced Bone Changes. Available at: https://www.nasa.gov/reference/risk-of-spaceflight-induced-bone-changes/ (Accessed: 15 November 2026).
-> 3. Sibonga, J. et al. (2019) 'Resistive exercise in astronauts on prolonged spaceflights provides partial protection against spaceflight-induced bone loss', Bone, 128, 112037. doi: 10.1016/j.bone.2019.07.013.
-> 4. Smith, S.M. et al. (1998) 'Collagen cross-link excretion during space flight and bed rest', Journal of Clinical Endocrinology & Metabolism, 83(10), pp. 3584–3591.
+> 1. NASA (n.d.) Risk of Spaceflight-Induced Bone Changes. Available at: https://www.nasa.gov/reference/risk-of-spaceflight-induced-bone-changes/ (Accessed: 15 November 2026).
+> 2. Sibonga, J. et al. (2019) 'Resistive exercise in astronauts on prolonged spaceflights provides partial protection against spaceflight-induced bone loss', Bone, 128, 112037. doi: 10.1016/j.bone.2019.07.013.
+> 3. Smith, S.M. et al. (1998) 'Collagen cross-link excretion during space flight and bed rest', Journal of Clinical Endocrinology & Metabolism, 83(10), pp. 3584–3591.
