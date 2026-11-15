@@ -9,7 +9,7 @@ Spending time in space leads to confinement and isolation. This results in decre
 
 
 <img src="images/mental_health_image.jpg" alt="Image of a lonely astronaut" width="1200"/>
-*A lonely astronaut, Source: https://www.pexels.com/zh-tw/photo/7660827/*
+*A lonely astronaut, Source: https://www.pexels.com/zh-tw/photo/7660827/
 
 ## Causes
 
