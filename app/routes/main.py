@@ -18,7 +18,7 @@ from app.utils.validation import (
     TODAY_DATA_FIELDS,
     USERNAME_MAX_LENGTH,
     USERNAME_MIN_LENGTH,
-    launch_date_limits,
+    launch_date_limits,)
 from app.utils.vital_signs import (
     blood_oxygen,
     breathing_rate,
