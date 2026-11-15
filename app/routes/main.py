@@ -1,5 +1,5 @@
 from flask import Blueprint, redirect, render_template, session, request
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from app.utils.greeting import get_gmt_greeting
 import db
 
@@ -36,11 +36,80 @@ def dashboard():
     if "username" not in session:
         return redirect("/login")
 
+    username = session["username"]
+    user = db.get_user(username) or {}
+    today_data = db.get_today_data(username)
+    streak = db.get_current_streak(username)
+    db.edit_user(username, "streak", streak)
+    user["streak"] = streak
+    today = datetime.now(timezone.utc).date()
+    dates = [today - timedelta(days=offset) for offset in range(6, -1, -1)]
+    chart_definitions = (
+        ("sleep_hours", "Sleep", "hours", user.get("sleep_target", 8)),
+        ("resting_heart_rate", "Resting heart rate", "bpm", None),
+        ("glucose_level", "Glucose", "mg/dL", None),
+        ("blood_pressure", "Blood pressure · systolic", "mmHg", None),
+        ("water", "Water intake", "ml", user.get("water_target", 2500)),
+        ("breaths_per_min", "Breaths per minute", "breaths/min", None),
+        ("o2_level", "Blood oxygen", "%", None),
+        ("body_temp", "Body temperature", "°C", None),
+    )
+    charts = []
+    for field, title, unit, target in chart_definitions:
+        records = db.get_last_7_days_data(username, field)
+        values_by_date = {record["date"]: record.get(field) for record in records}
+        points = []
+        for day in dates:
+            value = values_by_date.get(day.isoformat())
+            if field == "blood_pressure":
+                value = str(value).strip() if value is not None else None
+            elif value is not None:
+                try:
+                    value = float(value)
+                except (TypeError, ValueError):
+                    value = None
+            points.append({"label": day.strftime("%a"), "value": value})
+        charts.append({
+            "field": field,
+            "title": title,
+            "unit": unit,
+            "target": target,
+            "points": points,
+        })
+
     return render_template(
         "dashboard.html",
-        username=session["username"],
+        username=username,
         greeting=get_gmt_greeting(),
+        today_gmt=today.isoformat(),
+        today_data=today_data,
+        user=user,
+        charts=charts,
+    )
+
+
+@main_bp.route("/pvt", methods=["GET"])
+def pvt():
+    if "username" not in session:
+        return redirect("/login")
+    return render_template("pvt.html", username=session["username"])
+
+
+@main_bp.route("/today", methods=["GET"])
+@main_bp.route("/edit-today", methods=["GET"])
+def today_data():
+    if "username" not in session:
+        return redirect("/login")
+
+    username = session["username"]
+    return render_template(
+        "today_data.html",
+        username=username,
+        today_data=db.get_today_data(username),
+        user=db.get_user(username) or {},
         today_gmt=datetime.now(timezone.utc).date().isoformat(),
+        saved=request.args.get("saved") == "true",
+        error=request.args.get("error"),
     )
 
 

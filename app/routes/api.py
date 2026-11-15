@@ -1,5 +1,6 @@
 import math
-from datetime import date
+import re
+from datetime import date, datetime, timezone
 
 from flask import Blueprint, current_app, request, redirect, session, jsonify
 from auth import auth_login, hash_password
@@ -10,6 +11,282 @@ import db
 api_bp = Blueprint("api", __name__)
 
 TEMP_REFCODE = "123456"  # Temporary referral code for testing purposes
+TODAY_DATA_FIELDS = {
+    "resting_heart_rate": (20, 250),
+    "body_temp": (30, 45),
+    "o2_level": (50, 100),
+    "glucose_level": (20, 600),
+    "breaths_per_min": (1, 80),
+    "water": (0, 20000),
+    "sleep_hours": (0, 24),
+    "exercise": (0, 1440),
+}
+PVT_OUTCOMES = {"commission", "false_start", "response", "lapse", "omission", "truncated"}
+
+
+def _percentile(values, percentile):
+    ordered = sorted(values)
+    if not ordered:
+        return None
+    position = (len(ordered) - 1) * percentile
+    lower = math.floor(position)
+    upper = math.ceil(position)
+    if lower == upper:
+        return ordered[lower]
+    return ordered[lower] + (ordered[upper] - ordered[lower]) * (position - lower)
+
+
+def score_pvt_trials(trials):
+    scored_trials = [trial for trial in trials if trial["outcome"] != "truncated"]
+    response_times = [
+        trial["reaction_time_ms"]
+        for trial in scored_trials
+        if trial["reaction_time_ms"] is not None and trial["reaction_time_ms"] >= 100
+    ]
+    reciprocal_times = [1000 / response_time for response_time in response_times]
+    non_lapse_reciprocals = [
+        1000 / trial["reaction_time_ms"]
+        for trial in scored_trials
+        if trial["reaction_time_ms"] is not None
+        and 100 <= trial["reaction_time_ms"] <= 500
+    ]
+    fastest_count = max(1, math.ceil(len(response_times) * 0.1)) if response_times else 0
+    fastest_reciprocals = [
+        1000 / response_time for response_time in sorted(response_times)[:fastest_count]
+    ]
+    slowest_reciprocals = [
+        1000 / response_time for response_time in sorted(response_times)[-fastest_count:]
+    ]
+    lapse_count = sum(trial["outcome"] in {"lapse", "omission"} for trial in scored_trials)
+    omission_count = sum(trial["outcome"] == "omission" for trial in scored_trials)
+    commission_count = sum(trial["outcome"] == "commission" for trial in scored_trials)
+    false_start_count = sum(
+        trial["outcome"] in {"commission", "false_start"} for trial in scored_trials
+    )
+    valid_stimuli = sum(
+        trial["stimulus_onset_ms"] is not None for trial in scored_trials
+    )
+
+    return {
+        "trial_count": len(scored_trials),
+        "valid_stimulus_count": valid_stimuli,
+        "average_response_time_ms": (
+            sum(response_times) / len(response_times) if response_times else None
+        ),
+        "lapse_count": lapse_count,
+        "omission_count": omission_count,
+        "commission_count": commission_count,
+        "false_start_count": false_start_count,
+        "lapses_transformed": math.sqrt(lapse_count) + math.sqrt(lapse_count + 1),
+        "false_rt_percent": (
+            commission_count / valid_stimuli * 100 if valid_stimuli else None
+        ),
+        "overall_performance_score": (
+            1 - (false_start_count + lapse_count) / len(scored_trials)
+            if scored_trials else None
+        ),
+        "mean_reciprocal_rt_per_second": (
+            sum(reciprocal_times) / len(reciprocal_times) if reciprocal_times else None
+        ),
+        "mean_reciprocal_rt500_per_second": (
+            sum(non_lapse_reciprocals) / len(non_lapse_reciprocals)
+            if non_lapse_reciprocals else None
+        ),
+        "reciprocal_rt_variability_per_second": (
+            _percentile(reciprocal_times, 0.9) - _percentile(reciprocal_times, 0.1)
+            if reciprocal_times else None
+        ),
+        "fastest_10_percent_reciprocal_rt_per_second": (
+            sum(fastest_reciprocals) / len(fastest_reciprocals)
+            if fastest_reciprocals else None
+        ),
+        "slowest_10_percent_reciprocal_rt_per_second": (
+            sum(slowest_reciprocals) / len(slowest_reciprocals)
+            if slowest_reciprocals else None
+        ),
+    }
+
+
+@api_bp.route("/pvt-results", methods=["POST"])
+def save_pvt_results():
+    username = session.get("username")
+    if not username:
+        return jsonify(error="Not authenticated."), 401
+    if request.content_length is not None and request.content_length > 512_000:
+        return jsonify(error="PVT results payload is too large."), 413
+
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify(error="Provide PVT results as a JSON object."), 400
+    if not db.user_exists(username):
+        return jsonify(error="User not found."), 404
+
+    try:
+        started_at = datetime.fromisoformat(
+            str(data["started_at"]).replace("Z", "+00:00")
+        )
+        if started_at.tzinfo is None:
+            raise ValueError
+    except (KeyError, TypeError, ValueError):
+        return jsonify(error="Provide a valid timezone-aware start time."), 400
+
+    if data.get("duration_ms") != 180000:
+        return jsonify(error="PVT-B runs must last exactly 180000 milliseconds."), 400
+    trials = data.get("trials")
+    if not isinstance(trials, list) or not 1 <= len(trials) <= 500:
+        return jsonify(error="Provide between 1 and 500 trial records."), 400
+
+    def valid_number(value, minimum, maximum):
+        if not isinstance(value, (int, float)) or isinstance(value, bool):
+            return False
+        try:
+            return math.isfinite(value) and minimum <= value <= maximum
+        except OverflowError:
+            return False
+
+    cleaned_trials = []
+    for index, trial in enumerate(trials, start=1):
+        if not isinstance(trial, dict) or trial.get("trial_number") != index:
+            return jsonify(error="Trial records must be ordered and numbered consecutively."), 400
+
+        trial_start = trial.get("trial_start_ms")
+        foreperiod = trial.get("foreperiod_ms")
+        stimulus_onset = trial.get("stimulus_onset_ms")
+        response_at = trial.get("response_ms")
+        reaction_time = trial.get("reaction_time_ms")
+        outcome = trial.get("outcome")
+        if not valid_number(trial_start, 0, 180000):
+            return jsonify(error=f"Trial {index} has an invalid start time."), 400
+        if not valid_number(foreperiod, 0, 3000):
+            return jsonify(error=f"Trial {index} has an invalid foreperiod."), 400
+        if not isinstance(outcome, str) or outcome not in PVT_OUTCOMES:
+            return jsonify(error=f"Trial {index} has an invalid outcome."), 400
+        if stimulus_onset is not None and not valid_number(stimulus_onset, trial_start, 180000):
+            return jsonify(error=f"Trial {index} has an invalid stimulus time."), 400
+        if response_at is not None and not valid_number(response_at, trial_start, 180000):
+            return jsonify(error=f"Trial {index} has an invalid response time."), 400
+        if reaction_time is not None and not valid_number(reaction_time, 0, 30000):
+            return jsonify(error=f"Trial {index} has an invalid reaction time."), 400
+
+        has_response = response_at is not None
+        if outcome == "commission":
+            valid_trial = stimulus_onset is None and has_response and reaction_time is None
+        elif outcome == "truncated":
+            valid_trial = not has_response and reaction_time is None
+        elif outcome == "omission":
+            valid_trial = stimulus_onset is not None and not has_response and reaction_time is None
+        else:
+            valid_trial = (
+                stimulus_onset is not None
+                and has_response
+                and reaction_time is not None
+                and abs((response_at - stimulus_onset) - reaction_time) <= 1
+            )
+            if outcome == "false_start":
+                valid_trial = valid_trial and reaction_time < 100
+            elif outcome == "response":
+                valid_trial = valid_trial and 100 <= reaction_time <= 500
+            elif outcome == "lapse":
+                valid_trial = valid_trial and 500 < reaction_time <= 30000
+        if not valid_trial:
+            return jsonify(error=f"Trial {index} has inconsistent timing and outcome data."), 400
+        if (
+            stimulus_onset is not None
+            and stimulus_onset - trial_start < foreperiod - 1
+        ):
+            return jsonify(error=f"Trial {index} stimulus precedes its foreperiod."), 400
+
+        cleaned_trials.append({
+            "trial_number": index,
+            "trial_start_ms": trial_start,
+            "foreperiod_ms": foreperiod,
+            "stimulus_onset_ms": stimulus_onset,
+            "response_ms": response_at,
+            "reaction_time_ms": reaction_time,
+            "outcome": outcome,
+        })
+
+    scores = score_pvt_trials(cleaned_trials)
+    if not db.save_pvt_result(username, started_at.astimezone(timezone.utc), cleaned_trials, scores):
+        return jsonify(error="Could not save PVT results."), 500
+    return jsonify(success=True, scores=scores)
+
+
+@api_bp.route("/edit-today", methods=["POST"])
+def edit_today():
+    username = session.get("username")
+    is_json_request = request.is_json or "application/json" in request.headers.get("Accept", "")
+    if not username:
+        if is_json_request:
+            return jsonify(error="Not authenticated."), 401
+        return redirect("/login")
+
+    data = request.get_json(silent=True)
+    if data is None:
+        data = request.form.to_dict() if request.form else {}
+    if not isinstance(data, dict):
+        return jsonify(error="Provide today's data as an object."), 400
+    if "streak" in data:
+        message = "Your streak is calculated automatically from consecutive days with logged health data."
+        if is_json_request:
+            return jsonify(error=message), 400
+        return redirect("/today?error=streak")
+    if not db.user_exists(username):
+        return jsonify(error="User not found."), 404
+
+    updates = {}
+    for field, (minimum, maximum) in TODAY_DATA_FIELDS.items():
+        value = data.get(field)
+        if value in (None, ""):
+            continue
+        try:
+            number = float(value)
+            if not math.isfinite(number) or not minimum <= number <= maximum:
+                raise ValueError
+            updates[field] = int(number) if number.is_integer() else number
+        except (TypeError, ValueError):
+            message = f"Enter a valid {field.replace('_', ' ')} value."
+            if is_json_request:
+                return jsonify(error=message), 400
+            return redirect("/today?error=invalid")
+
+    blood_pressure = data.get("blood_pressure")
+    if blood_pressure not in (None, ""):
+        match = re.fullmatch(r"\s*(\d{2,3})\s*/\s*(\d{2,3})\s*", str(blood_pressure))
+        if not match:
+            message = "Enter blood pressure as systolic/diastolic, for example 120/80."
+            if is_json_request:
+                return jsonify(error=message), 400
+            return redirect("/today?error=invalid")
+        systolic, diastolic = (int(value) for value in match.groups())
+        if not 40 <= systolic <= 300 or not 20 <= diastolic <= 200 or systolic <= diastolic:
+            message = "Enter a valid systolic/diastolic blood pressure reading."
+            if is_json_request:
+                return jsonify(error=message), 400
+            return redirect("/today?error=invalid")
+        updates["blood_pressure"] = f"{systolic}/{diastolic}"
+
+    if not updates:
+        message = "Enter at least one value to update."
+        if is_json_request:
+            return jsonify(error=message), 400
+        return redirect("/today?error=empty")
+
+    for field, value in updates.items():
+        if not db.edit_today_data(username, field, value):
+            if is_json_request:
+                return jsonify(error="Failed to save today's health data."), 500
+            return redirect("/today?error=save")
+
+    streak = db.get_current_streak(username)
+    if not db.edit_user(username, "streak", streak):
+        if is_json_request:
+            return jsonify(error="Failed to save your streak."), 500
+        return redirect("/today?error=save")
+
+    if is_json_request:
+        return jsonify(success=True, message="Today's data updated.")
+    return redirect("/today?saved=true")
 
 @api_bp.route("/unit-conversion", methods=["POST"])
 def unit_conversion():

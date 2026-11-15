@@ -28,10 +28,14 @@ if "Users" not in database.list_collection_names():
 if "ReportedData" not in database.list_collection_names():
     database.create_collection("ReportedData")
 
+if "PVTResults" not in database.list_collection_names():
+    database.create_collection("PVTResults")
+
 
 # Collections:
 users_collection = database["Users"]
 reported_data_collection = database["ReportedData"]
+pvt_results_collection = database["PVTResults"]
 
 
 
@@ -60,7 +64,7 @@ def new_user(username: str, password_hash: str, birthday: str, height: float, ma
         users_collection.insert_one(user)
         return True
     except Exception as e:
-        print(f"❌ Error occurred while creating new user: {e}")
+        print(f"d❌ Error occurred while creating new user: {e}")
         return False
 
 def return_user_hash(username: str) -> str:
@@ -102,6 +106,8 @@ def edit_today_data(username: str, field: str, new_value) -> bool:
         "blood_pressure",
         "breaths_per_min",
         "water",
+        "sleep_hours",
+        "exercise",
     )
     if field not in data_fields:
         raise ValueError(f"Unknown health data field: {field}")
@@ -136,6 +142,8 @@ def get_today_data(username: str) -> dict:
         "blood_pressure",
         "breaths_per_min",
         "water",
+        "sleep_hours",
+        "exercise",
     )
     try:
         data = reported_data_collection.find_one({"username": username, "date": today_str})
@@ -146,6 +154,39 @@ def get_today_data(username: str) -> dict:
     except Exception as e:
         print(f"❌ Error occurred while retrieving today's data: {e}")
         return {field: None for field in data_fields}
+
+def get_current_streak(username: str) -> int:
+    data_fields = (
+        "resting_heart_rate",
+        "body_temp",
+        "o2_level",
+        "glucose_level",
+        "blood_pressure",
+        "breaths_per_min",
+        "water",
+        "sleep_hours",
+        "exercise",
+    )
+    try:
+        records = reported_data_collection.find(
+            {"username": username},
+            {"date": 1, **{field: 1 for field in data_fields}, "_id": 0},
+        ).sort("date", -1)
+        logged_dates = set()
+        for record in records:
+            if any(record.get(field) is not None for field in data_fields):
+                logged_dates.add(datetime.strptime(record["date"], "%Y-%m-%d").date())
+
+        today = datetime.now(timezone.utc).date()
+        expected = today if today in logged_dates else today - timedelta(days=1)
+        streak = 0
+        while expected in logged_dates:
+            streak += 1
+            expected -= timedelta(days=1)
+        return streak
+    except Exception as e:
+        print(f"❌ Error occurred while calculating current streak: {e}")
+        return 0
 
 def get_last_7_days_data(username:str, field:str) -> list:
     today = datetime.now(timezone.utc)
@@ -165,3 +206,27 @@ def get_last_7_days_data(username:str, field:str) -> list:
         print(f"❌ Error occurred while retrieving last 7 days data: {e}")
         return []
 
+def save_pvt_result(username: str, started_at: datetime, trials: list, scores: dict) -> bool:
+    try:
+        pvt_results_collection.insert_one({
+            "username": username,
+            "test_version": "PVT-B",
+            "started_at": started_at,
+            "completed_at": datetime.now(timezone.utc),
+            "duration_ms": 180000,
+            "configuration": {
+                "foreperiod_min_ms": 0,
+                "foreperiod_max_ms": 3000,
+                "counter_interval_ms": 50,
+                "response_timeout_ms": 30000,
+                "lapse_threshold_ms": 500,
+                "false_start_threshold_ms": 100,
+                "feedback_ms": 1000,
+            },
+            "trials": trials,
+            "scores": scores,
+        })
+        return True
+    except Exception as e:
+        print(f"❌ Error occurred while saving PVT results: {e}")
+        return False

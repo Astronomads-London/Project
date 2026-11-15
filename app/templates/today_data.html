@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Log Today’s Data — 11:56{% endblock %}
+{% block body_class %}today-data{% endblock %}
+{% block page_class %}page--today-data{% endblock %}
+
+{% block content %}
+<main class="today-data__content">
+  <header class="today-data__header">
+    <p class="dashboard__eyebrow">CREW WELLNESS · DAILY LOG</p>
+    <h1>Today’s health data</h1>
+    <p>Update your readings for {{ today_gmt }}. Leave a field blank to keep its current value.</p>
+  </header>
+
+  {% if saved %}
+    <p class="today-data__notice today-data__notice--success" role="status">Today’s health data was saved.</p>
+  {% elif error %}
+    <p class="today-data__notice today-data__notice--error" role="alert">
+      {% if error == "invalid" %}Check the values and units, then try again.
+      {% elif error == "empty" %}Enter at least one value to update.
+      {% elif error == "streak" %}Your streak is calculated automatically from your logged health data.
+      {% else %}Your data could not be saved. Please try again.{% endif %}
+    </p>
+  {% endif %}
+
+  <form class="today-data__form" action="{{ url_for('api.edit_today') }}" method="post">
+    <div class="today-data__fields">
+      <label class="today-data__field">
+        <span>Resting heart rate <small>bpm</small></span>
+        <input type="number" name="resting_heart_rate" min="20" max="250" step="1" value="{{ today_data.resting_heart_rate if today_data.resting_heart_rate is not none else '' }}">
+      </label>
+      <label class="today-data__field">
+        <span>Body temperature <small>°C</small></span>
+        <input type="number" name="body_temp" min="30" max="45" step="0.1" value="{{ today_data.body_temp if today_data.body_temp is not none else '' }}">
+      </label>
+      <label class="today-data__field">
+        <span>Blood oxygen <small>%</small></span>
+        <input type="number" name="o2_level" min="50" max="100" step="1" value="{{ today_data.o2_level if today_data.o2_level is not none else '' }}">
+      </label>
+      <label class="today-data__field">
+        <span>Glucose <small>mg/dL</small></span>
+        <input type="number" name="glucose_level" min="20" max="600" step="1" value="{{ today_data.glucose_level if today_data.glucose_level is not none else '' }}">
+      </label>
+      <label class="today-data__field">
+        <span>Blood pressure <small>mmHg · systolic/diastolic</small></span>
+        <input type="text" name="blood_pressure" inputmode="numeric" pattern="[0-9]{2,3}\s*/\s*[0-9]{2,3}" placeholder="120/80" value="{{ today_data.blood_pressure or '' }}">
+      </label>
+      <label class="today-data__field">
+        <span>Breaths per minute <small>breaths/min</small></span>
+        <input type="number" name="breaths_per_min" min="1" max="80" step="1" value="{{ today_data.breaths_per_min if today_data.breaths_per_min is not none else '' }}">
+      </label>
+      <label class="today-data__field">
+        <span>Water intake <small>ml</small></span>
+        <input type="number" name="water" min="0" max="20000" step="50" value="{{ today_data.water if today_data.water is not none else '' }}">
+      </label>
+      <label class="today-data__field">
+        <span>Sleep <small>hours</small></span>
+        <input type="number" name="sleep_hours" min="0" max="24" step="0.25" value="{{ today_data.sleep_hours if today_data.sleep_hours is not none else '' }}">
+      </label>
+      <label class="today-data__field">
+        <span>Exercise <small>minutes</small></span>
+        <input type="number" name="exercise" min="0" max="1440" step="1" value="{{ today_data.exercise if today_data.exercise is not none else '' }}">
+      </label>
+    </div>
+    <div class="today-data__actions">
+      <a href="{{ url_for('main.dashboard') }}">Back to dashboard</a>
+      <button type="submit">Save today’s data</button>
+    </div>
+  </form>
+</main>
+{% endblock %}
