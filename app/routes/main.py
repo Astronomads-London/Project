@@ -23,6 +23,7 @@ from app.utils.validation import (
 from app.utils.vital_signs import (
     blood_oxygen,
     breathing_rate,
+    chart_status,
     heart_rate,
     blood_pressure,
     temperature,
@@ -104,7 +105,11 @@ def dashboard():
                     value = float(value)
                 except (TypeError, ValueError):
                     value = None
-            points.append({"label": day.strftime("%a"), "value": value})
+            points.append({
+                "label": day.strftime("%a"),
+                "value": value,
+                "status": chart_status(field, value, target),
+            })
         charts.append({
             "field": field,
             "title": title,

@@ -155,6 +155,13 @@
 
   <p id="dashboard-status" class="dashboard-status" role="status" aria-live="polite"></p>
 
+  <ul class="metric-chart-legend" aria-label="Chart value colors">
+    <li><span class="metric-chart-legend__swatch metric-chart-legend__swatch--good"></span>Good / normal</li>
+    <li><span class="metric-chart-legend__swatch metric-chart-legend__swatch--concerning"></span>Concerning</li>
+    <li><span class="metric-chart-legend__swatch metric-chart-legend__swatch--critical"></span>Critical</li>
+    <li><span class="metric-chart-legend__swatch metric-chart-legend__swatch--neutral"></span>Not rated</li>
+  </ul>
+
   <section class="dashboard-card sleep-card" aria-labelledby="sleep-title">
     <div class="sleep-card__heading">
       <div>
@@ -334,12 +341,18 @@
         const height = Math.max(4, (reading / max) * (plot.bottom - plot.top));
         const rect = svgElement("rect", {
           x, y: plot.bottom, width: 52, height: 0, rx: 7,
-          class: `metric-chart__bar metric-chart__bar--${chart.field}`,
+          class: `metric-chart__bar metric-chart__bar--${chart.field} metric-chart__bar--${point.status || "neutral"}`,
           tabindex: 0,
           role: "img"
         });
         const valueLabel = `${point.value} ${chart.unit}`;
-        rect.setAttribute("aria-label", `${point.label}: ${valueLabel}`);
+        const statusLabel = {
+          good: "good or normal",
+          concerning: "concerning",
+          critical: "critical",
+          neutral: "not rated"
+        }[point.status] || "not rated";
+        rect.setAttribute("aria-label", `${point.label}: ${valueLabel}, ${statusLabel}`);
         const title = svgElement("title");
         title.textContent = `${point.label}: ${valueLabel}`;
         rect.appendChild(title);
