@@ -25,8 +25,8 @@ Biomarkers don't directly measure bone density, but biomarkers change quickly wi
 
 ## Urine biomarkers
 
-* High levels of C-Telopeptide-1 (CTX1) and N-telopeptide (NTX):
-Type I collagen makes up most of organic bone. When osteoclasts break down bone, the collagen is destroyed, releasing small C-Telopeptide and N-Telopeptide fragments, which end up in the urine. In microgravity, there is an expected 50-80% rise in CTX1 and NTX.
+* High levels of N-telopeptide (NTX):
+Type I collagen makes up most of organic bone. When osteoclasts break down bone, the collagen is destroyed, releasing small N-Telopeptide fragments, which end up in the urine. In microgravity, there is an expected 50-80% rise in NTX.
 
 * Hypercalciuria (high calcium in urine): When bone breaks down, stored calcium is released into the bloodstream and then filtered out by the kidneys into the urine. This increases the risk of kidney stones, which can cause severe pain (renal colic), blood in the urine (hematuria), infection that may lead to a life-threatening response in which the immune system damages the body's own organs (sepsis), and swelling of the kidney due to a build-up of urine (hydronephrosis), which can lead to kidney problems.
 
