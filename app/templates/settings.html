@@ -16,7 +16,7 @@
     <p class="settings-intro">Configure personal biometric details, daily health targets, and mission control preferences in standard SI units.</p>
   </header>
 
-  <form id="settings-form" class="settings-form" action="{{ url_for('main.settings') }}" method="post">
+  <form id="settings-form" class="settings-form" action="{{ url_for('api.edit_settings') }}" method="post">
     <div class="settings-grid">
       <!-- Biometric & Personal Profile Section -->
       <section class="settings-card" aria-labelledby="biometrics-heading">
@@ -27,27 +27,25 @@
           <label class="settings-field">
             <span class="settings-field__label">SEX</span>
             <select class="settings-field__input" name="sex" id="setting-sex" required>
-              <option value="" disabled>Select sex</option>
-              <option value="Male" selected>Male</option>
-              <option value="Female">Female</option>
-              <option value="Other">Other</option>
-              <option value="Prefer not to say">Prefer not to say</option>
+              <option value="" disabled {% if not user.sex %}selected{% endif %}>Select sex</option>
+              <option value="Male" {% if user.sex == 'Male' or not user.sex %}selected{% endif %}>Male</option>
+              <option value="Female" {% if user.sex == 'Female' %}selected{% endif %}>Female</option>
             </select>
           </label>
 
           <label class="settings-field">
             <span class="settings-field__label">BIRTHDAY</span>
-            <input class="settings-field__input" type="date" name="birthday" id="setting-birthday" value="1995-04-12" required>
+            <input class="settings-field__input" type="date" name="birthday" id="setting-birthday" value="{{ user.birthday or '1995-04-12' }}" required>
           </label>
 
           <label class="settings-field">
             <span class="settings-field__label">HEIGHT (CM)</span>
-            <input class="settings-field__input" type="number" name="height" id="setting-height" placeholder="e.g. 175" min="0" step="any" value="175" required>
+            <input class="settings-field__input" type="number" name="height" id="setting-height" placeholder="e.g. 175" min="0" step="any" value="{{ user.height if (user.height is defined and user.height is not none and user.height != '') else 175 }}" required>
           </label>
 
           <label class="settings-field">
             <span class="settings-field__label">BODY MASS (KG)</span>
-            <input class="settings-field__input" type="number" name="mass" id="setting-mass" placeholder="e.g. 70" min="0" step="any" value="70" required>
+            <input class="settings-field__input" type="number" name="mass" id="setting-mass" placeholder="e.g. 70" min="0" step="any" value="{{ user.mass if (user.mass is defined and user.mass is not none and user.mass != '') else 70 }}" required>
           </label>
         </div>
       </section>
@@ -60,25 +58,25 @@
         <div class="settings-fields">
           <label class="settings-field">
             <span class="settings-field__label">DAILY WATER TARGET (ML)</span>
-            <input class="settings-field__input" type="number" name="water_target" id="setting-water" placeholder="e.g. 2500" min="0" step="50" value="2500" required>
+            <input class="settings-field__input" type="number" name="water_target" id="setting-water" placeholder="e.g. 2500" min="0" step="50" value="{{ user.water_target if (user.water_target is defined and user.water_target is not none and user.water_target != '') else 2500 }}" required>
           </label>
 
           <label class="settings-field">
             <span class="settings-field__label">DAILY EXERCISE TARGET (MINUTES)</span>
-            <input class="settings-field__input" type="number" name="exercise_target" id="setting-exercise" placeholder="e.g. 60" min="0" step="5" value="60" required>
+            <input class="settings-field__input" type="number" name="exercise_target" id="setting-exercise" placeholder="e.g. 60" min="0" step="5" value="{{ user.exercise_target if (user.exercise_target is defined and user.exercise_target is not none and user.exercise_target != '') else 60 }}" required>
           </label>
 
           <label class="settings-field">
             <span class="settings-field__label">DAILY SLEEP TARGET (HOURS)</span>
-            <input class="settings-field__input" type="number" name="sleep_target" id="setting-sleep" placeholder="e.g. 8.0" min="0" max="24" step="0.5" value="8.0" required>
+            <input class="settings-field__input" type="number" name="sleep_target" id="setting-sleep" placeholder="e.g. 8.0" min="0" max="24" step="0.5" value="{{ user.sleep_target if (user.sleep_target is defined and user.sleep_target is not none and user.sleep_target != '') else 8.0 }}" required>
           </label>
 
           <label class="settings-field">
             <span class="settings-field__label">HYDRATION REMINDERS</span>
             <select class="settings-field__input" name="hydration_reminders" id="setting-reminders">
-              <option value="2h" selected>Every 2 hours during active mission</option>
-              <option value="1h">Every hour during active mission</option>
-              <option value="disabled">Disabled</option>
+              <option value="2h" {% if user.hydration_reminders == '2h' or user.hydration_reminder == 2 or (not user.hydration_reminders and not user.hydration_reminder) %}selected{% endif %}>Every 2 hours during active mission</option>
+              <option value="1h" {% if user.hydration_reminders == '1h' or user.hydration_reminder == 1 %}selected{% endif %}>Every hour during active mission</option>
+              <option value="disabled" {% if user.hydration_reminders == 'disabled' or user.hydration_reminder == 0 %}selected{% endif %}>Disabled</option>
             </select>
           </label>
         </div>
@@ -93,20 +91,20 @@
           <label class="settings-field">
             <span class="settings-field__label">ENVIRONMENT</span>
             <select class="settings-field__input" name="environment" id="setting-environment" required>
-              <option value="iss" selected>ISS (International Space Station)</option>
-              <option value="mars">Mars Base</option>
-              <option value="moon">Lunar Outpost</option>
+              <option value="iss" {% if user.environment and user.environment|lower == 'iss' or not user.environment %}selected{% endif %}>ISS (International Space Station)</option>
+              <option value="mars" {% if user.environment and user.environment|lower == 'mars' %}selected{% endif %}>Mars Base</option>
+              <option value="moon" {% if user.environment and user.environment|lower == 'moon' %}selected{% endif %}>Lunar Outpost</option>
             </select>
           </label>
 
           <label class="settings-field">
             <span class="settings-field__label">LAUNCH DATE</span>
-            <input class="settings-field__input" type="date" name="launch_date" id="setting-launch-date" value="{{ today_gmt }}" required>
+            <input class="settings-field__input" type="date" name="launch_date" id="setting-launch-date" value="{{ user.launch_date if user.launch_date else today_gmt }}" required>
           </label>
 
           <label class="settings-field">
             <span class="settings-field__label">MISSION LENGTH (DAYS)</span>
-            <input class="settings-field__input" type="number" name="mission_length" id="setting-mission-length" placeholder="e.g. 180" min="1" max="2000" value="180" required>
+            <input class="settings-field__input" type="number" name="mission_length" id="setting-mission-length" placeholder="e.g. 180" min="1" max="2000" value="{{ user.mission_length or user.mission_duration or 180 }}" required>
           </label>
         </div>
       </section>
@@ -135,7 +133,7 @@
         }
         Object.entries(data).forEach(([key, val]) => {
           const field = form.elements[key];
-          if (field) {
+          if (field && val !== undefined && val !== null && val !== "") {
             field.value = val;
           }
         });
@@ -144,7 +142,7 @@
       // Local storage fallback
     }
 
-    form.addEventListener("submit", function(event) {
+    form.addEventListener("submit", async function(event) {
       event.preventDefault();
 
       const formData = new FormData(form);
@@ -152,11 +150,31 @@
       settingsObj.mission_start = settingsObj.launch_date; // Keep alias for backward compatibility
 
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(settingsObj));
-      } catch (e) {}
+        const response = await fetch(form.action, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          body: JSON.stringify(settingsObj)
+        });
 
-      statusBox.textContent = "Settings successfully updated.";
-      statusBox.className = "settings-status settings-status--success";
+        if (response.ok) {
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(settingsObj));
+          } catch (e) {}
+
+          statusBox.textContent = "Settings successfully updated.";
+          statusBox.className = "settings-status settings-status--success";
+        } else {
+          const errData = await response.json().catch(() => ({}));
+          statusBox.textContent = errData.error || "Failed to update settings.";
+          statusBox.className = "settings-status settings-status--error";
+        }
+      } catch (err) {
+        statusBox.textContent = "Failed to update settings. Please check your connection.";
+        statusBox.className = "settings-status settings-status--error";
+      }
 
       setTimeout(function() {
         statusBox.style.opacity = "0";

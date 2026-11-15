@@ -1,6 +1,7 @@
 from flask import Blueprint, redirect, render_template, session, request
 from datetime import datetime, timezone
 from app.utils.greeting import get_gmt_greeting
+import db
 
 main_bp = Blueprint("main", __name__)
 
@@ -48,9 +49,12 @@ def settings():
     if "username" not in session:
         return redirect("/login")
 
+    user = db.get_user(session["username"]) or {}
+
     return render_template(
         "settings.html",
         username=session["username"],
+        user=user,
         today_gmt=datetime.now(timezone.utc).date().isoformat(),
     )
 
