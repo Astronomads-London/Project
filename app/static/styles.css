@@ -1836,6 +1836,41 @@ body.dashboard.env-moon {
   font: 600 13px "Inter", sans-serif;
 }
 
+.dashboard__alerts {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+  max-width: 100%;
+}
+
+.dashboard-alert {
+  padding: 14px 20px;
+  border: 1px solid rgba(202, 232, 247, 0.25);
+  border-radius: 12px;
+  font-family: "Inter", sans-serif;
+  font-size: clamp(14px, calc(16 * var(--u)), 18px);
+  font-weight: 500;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.dashboard-alert p {
+  margin: 0;
+}
+
+.dashboard-alert--concerning {
+  background-color: #ffd8a8;
+  color: #431407;
+  border: 1px solid rgba(202, 232, 247, 0.35);
+}
+
+.dashboard-alert--critical {
+  background-color: red;
+  color: #ffffff;
+  border: 1px solid rgba(202, 232, 247, 0.35);
+}
+
 .page--pvt {
   min-height: 100vh;
   background:
