@@ -1,6 +1,4 @@
-# Bone Health 
-
-Author: Richard Roe
+# Bone Health
 
 Published: 14th November 2026
 
@@ -8,7 +6,7 @@ Published: 14th November 2026
 
 Bone constantly repairs itself where osteoclasts break down old and damaged bone tissue, while osteoblasts build new bone.
 
-In microgravity, the bones are not used in their intended way. Without the normal mechanical load of gravity, bone resorption by osteoclasts goes at a faster rate than bone formation, leading to bone loss. As a result, astronauts' bones are weaker after a mission, increasing risk of fractures from activities that would not normally cause injury. The body does not need to support its own weight, so on average astronauts lose 1–1.5% of their density per month during four-to-six-month missions.
+In microgravity, the bones are not used in their intended way. Without the normal mechanical load of gravity, bone resorption by osteoclasts goes at a faster rate than bone formation, leading to bone loss. As a result, astronauts' bones are weaker after and during a mission, increasing risk of fractures from activities that would not normally cause injury. The body does not need to support its own weight, so on average astronauts lose 1–1.5% of their density per month during four-to-six-month missions. Plus, their spine elongates which means astronauts are taller after a mission when they return to Earth.
 
 ![Image of a bone](images/bone_image.jpg)
 *Inner structure of a femur, Source: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqgXd4pZUKkxEPozU5TrrzqUJ2CbW7dhRlATA0prs3Zu1cgq5yb_68EG6h&s=10*
