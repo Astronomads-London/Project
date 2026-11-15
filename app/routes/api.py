@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 
 from flask import Blueprint, current_app, request, redirect, session, jsonify
 from auth import auth_login, hash_password
+from app.utils.unitconversion import height_to_cm, pounds_to_kg, cm_to_feet_and_inches, kg_to_pounds
 from app.utils.birthday import birthday_error, parse_birthday
 from app.utils.bloodpressure import BLOOD_PRESSURE_ERROR, parse_blood_pressure
 from app.utils.unitconversion import height_to_cm, pounds_to_kg
@@ -374,11 +375,23 @@ def unit_conversion():
         return jsonify(error="Provide conversion values as an object."), 400
 
     conversion = data.get("conversion")
+    if "centimetres" in data and "cm" not in data:
+        data["cm"] = data["centimetres"]
+    if "kilograms" in data and "kg" not in data:
+        data["kg"] = data["kilograms"]
+
     values = {}
 
     required_fields = {
         "height": ("feet", "inches"),
+        "height_reverse": ("cm",),
+        "cm_to_feet": ("cm",),
+        "cm_to_feet_and_inches": ("cm",),
+        "cm": ("cm",),
         "weight": ("pounds",),
+        "weight_reverse": ("kg",),
+        "kg_to_pounds": ("kg",),
+        "kg": ("kg",),
     }
     if conversion not in required_fields:
         return jsonify(error="Choose a supported conversion."), 400
@@ -396,6 +409,15 @@ def unit_conversion():
             return jsonify(error=problem), 400
         result = height_to_cm(values["feet"], values["inches"])
         return jsonify(result=f"{result:.2f} cm")
+
+    if conversion in ("height_reverse", "cm_to_feet", "cm_to_feet_and_inches", "cm"):
+        feet, inches = cm_to_feet_and_inches(values["cm"])
+        feet_int = int(feet) if hasattr(feet, "is_integer") and feet.is_integer() else int(feet)
+        return jsonify(result=f"{feet_int} feet and {inches} inches")
+
+    if conversion in ("weight_reverse", "kg_to_pounds", "kg"):
+        result = kg_to_pounds(values["kg"])
+        return jsonify(result=f"{result:.2f} pounds")
 
     result = pounds_to_kg(values["pounds"])
     return jsonify(result=f"{result:.2f} kg")

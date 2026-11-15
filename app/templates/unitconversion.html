@@ -47,6 +47,86 @@
 </main>
 
 <script>
+  const heightReverseBtn = document.getElementById("height-reverse-btn");
+  const heightDesc = document.getElementById("height-conversion-desc");
+  const heightForm = document.getElementById("height-form");
+  const heightFields = document.getElementById("height-fields");
+  const heightSubmitBtn = document.getElementById("height-submit-btn");
+
+  let isHeightReversed = false;
+
+  if (heightReverseBtn) {
+    heightReverseBtn.addEventListener("click", () => {
+      isHeightReversed = !isHeightReversed;
+      const result = heightForm.querySelector(".conversion-result");
+      if (result) result.textContent = "";
+
+      if (isHeightReversed) {
+        heightDesc.textContent = "Centimetres to feet and inches";
+        heightForm.dataset.conversion = "height_reverse";
+        heightFields.innerHTML = `
+          <label class="conversion-form__single">
+            <span>Centimetres</span>
+            <input type="number" name="cm" min="0" step="any" inputmode="decimal" required>
+          </label>
+        `;
+        heightSubmitBtn.textContent = "CONVERT TO FEET AND INCHES";
+      } else {
+        heightDesc.textContent = "Feet and inches to centimetres";
+        heightForm.dataset.conversion = "height";
+        heightFields.innerHTML = `
+          <label>
+            <span>Feet</span>
+            <input type="number" name="feet" min="0" step="any" inputmode="decimal" required>
+          </label>
+          <label>
+            <span>Inches</span>
+            <input type="number" name="inches" min="0" step="any" value="0" inputmode="decimal" required>
+          </label>
+        `;
+        heightSubmitBtn.textContent = "CONVERT TO CM";
+      }
+    });
+  }
+
+  const weightReverseBtn = document.getElementById("weight-reverse-btn");
+  const weightDesc = document.getElementById("weight-conversion-desc");
+  const weightForm = document.getElementById("weight-form");
+  const weightFields = document.getElementById("weight-fields");
+  const weightSubmitBtn = document.getElementById("weight-submit-btn");
+
+  let isWeightReversed = false;
+
+  if (weightReverseBtn) {
+    weightReverseBtn.addEventListener("click", () => {
+      isWeightReversed = !isWeightReversed;
+      const result = weightForm.querySelector(".conversion-result");
+      if (result) result.textContent = "";
+
+      if (isWeightReversed) {
+        weightDesc.textContent = "Kilograms to pounds";
+        weightForm.dataset.conversion = "weight_reverse";
+        weightFields.innerHTML = `
+          <label class="conversion-form__single">
+            <span>Kilograms</span>
+            <input type="number" name="kg" min="0" step="any" inputmode="decimal" required>
+          </label>
+        `;
+        weightSubmitBtn.textContent = "CONVERT TO POUNDS";
+      } else {
+        weightDesc.textContent = "Pounds to kilograms";
+        weightForm.dataset.conversion = "weight";
+        weightFields.innerHTML = `
+          <label class="conversion-form__single">
+            <span>Pounds</span>
+            <input type="number" name="pounds" min="0" step="any" inputmode="decimal" required>
+          </label>
+        `;
+        weightSubmitBtn.textContent = "CONVERT TO KG";
+      }
+    });
+  }
+
   document.querySelectorAll(".conversion-form").forEach((form) => {
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
