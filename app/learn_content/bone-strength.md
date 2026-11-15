@@ -6,7 +6,7 @@ Published: 14th November 2026
 
 Bone constantly repairs itself where osteoclasts break down old and damaged bone tissue, while osteoblasts build new bone.
 
-In microgravity, the bones are not used in their intended way. Without the normal mechanical load of gravity, bone resorption by osteoclasts goes at a faster rate than bone formation, leading to bone loss. As a result, astronauts' bones are weaker after and during a mission, increasing risk of fractures from activities that would not normally cause injury. The body does not need to support its own weight, so on average astronauts lose 1–1.5% of their density per month during four-to-six-month missions. Plus, their spine elongates which means astronauts are taller after a mission when they return to Earth.
+In microgravity, bone functions differently than on Earth. Without the normal mechanical load of gravity, bone resorption by osteoclasts goes at a faster rate than bone formation by osteoblasts, leading to bone loss. As a result, astronauts' bones are weaker after and during a mission, increasing risk of fractures from activities that would not normally cause injury. The body does not need to support its own weight, so on average astronauts lose 1–1.5% of their density per month during four-to-six-month missions. In addition, their spine elongates which means astronauts are taller after a mission when they return to Earth.
 
 ![Image of a bone](images/bone_image.jpg)
 *Inner structure of a femur, Source: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqgXd4pZUKkxEPozU5TrrzqUJ2CbW7dhRlATA0prs3Zu1cgq5yb_68EG6h&s=10*
@@ -25,10 +25,10 @@ Biomarkers don't directly measure bone density, but biomarkers change quickly wi
 
 ### Urine biomarkers
 
-* High levels of C-telopeptide-1 (CTX1) and N-telopeptide (NTX):
-Type I collagen makes up most of organic bone. When osteoclasts break down bone, the collagen is destroyed, releasing small C-terminal and N-terminal telopeptide pieces, which are removed in urine. During spaceflight, urinary collagen breakdown products have been measured at around twice their preflight levels.
+* High levels of C-Telopeptide-1 (CTX1) and N-telopeptide (NTX):
+Type I collagen makes up most of organic bone. When osteoclasts break down bone, the collagen is destroyed, releasing small C-Telopeptide and N-Telopeptide fragments, which end up in the urine. In microgravity, there is an expected 50-80% rise in CTX1 and NTX.
 
-* Hypercalciuria (high calcium in urine): When bone breaks down, stored calcium is released into the bloodstream and then filtered out by the kidneys  into the urine. This increases the risk of kidney   stones, which can cause severe pain (renal colic), blood in the urine (haematuria), infection that may lead to a life-threatening response in which the immune system damages the body's own organs (sepsis), and swelling of the kidney due to a build-up of urine (hydronephrosis), which can lead to kidney problems.
+* Hypercalciuria (high calcium in urine): When bone breaks down, stored calcium is released into the bloodstream and then filtered out by the kidneys into the urine. This increases the risk of kidney stones, which can cause severe pain (renal colic), blood in the urine (hematuria), infection that may lead to a life-threatening response in which the immune system damages the body's own organs (sepsis), and swelling of the kidney due to a build-up of urine (hydronephrosis), which can lead to kidney problems.
 
 ### Blood biomarkers
 
@@ -42,7 +42,7 @@ Type I collagen makes up most of organic bone. When osteoclasts break down bone,
 - *Exercise (ARED):* putting weight on the skeleton by doing exercise reduces bone loss, and therefore the amount of calcium released reduces.
 - *Bisphosphonates:* drugs that suppress osteoclast activity. Combined with ARED, they have been shown to reduce major bone loss in astronauts.
 - *Hydration:* drinking more dilutes urine, so there is a lower concentration of stone forming minerals.
-- *Low-sodium diet:* this makes the kidney reabsorb sodium back into the blood due to a lower concentration of it. Since calcium is also reabsorbed with sodium, increasing sodium reabsorbtion also increases calcium absorbtion, reducing hypercalcuria.
+- *Low-sodium diet:* this makes the kidney reabsorb sodium back into the blood due to a lower concentration of it. Since calcium is also reabsorbed with sodium, increasing sodium reabsorbtion also increases calcium reabsorption, reducing hypercalcuria.
 
 
 > Sources:
