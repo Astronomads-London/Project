@@ -10,8 +10,8 @@ Bone is constantly remodelled: osteoclasts break down old and damaged bone tissu
 
 In microgravity, this balance is disrupted. Without the normal mechanical load of gravity, bone resorption by osteoclasts outpaces bone formation, leading to rapid bone loss. As a result, astronauts' bones are weaker after a mission, putting them at higher risk of fractures from activities that would not normally cause injury. Weight-bearing bones such as the hips and spine no longer need to support the body's weight, so on average they lose 1–1.5% of their density per month during four-to-six-month missions.
 
-![Image of a bone](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqgXd4pZUKkxEPozU5TrrzqUJ2CbW7dhRlATA0prs3Zu1cgq5yb_68EG6h&s=10)
-*Inner structure of a femur, Source*
+![Image of a bone](images/bone_image.jpg)
+*Inner structure of a femur, Source: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqgXd4pZUKkxEPozU5TrrzqUJ2CbW7dhRlATA0prs3Zu1cgq5yb_68EG6h&s=10*
 
 ### Precautions
 
