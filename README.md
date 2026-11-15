@@ -8,6 +8,22 @@ Run `python -m app.db` to connect and create the `App` database and `Users`
 collection if needed. For MongoDB Atlas, the cluster must be running and its
 network access settings must allow the connecting IP address.
 
+## Flight surgeon accounts
+
+The sign-up form has an Astronaut / Flight surgeon switch. Astronauts sign up
+with `INVITE_CODE` and their health profile; flight surgeons sign up with
+`SURGEON_INVITE_CODE` and only a username and password. Set both codes in
+`.env` and keep them different (a flight surgeon code identical to the
+astronaut code is refused). Flight surgeons log in on the normal
+login page and land on `/surgeon`, which lists every astronaut with any
+readings flagged in the last seven days. Selecting an astronaut shows their
+profile, charts, PVT results and self-reported data.
+
+Flight surgeons write treatment instructions for an astronaut on
+`/surgeon/treatment`. Each astronaut has one conversation shared by all flight
+surgeons, stored in the `Messages` collection; the astronaut reads it and
+replies on `/messages`. The latest messages also appear on both dashboards.
+
 ## Brief Psychomotor Vigilance Test
 
 Authenticated participants can open the three-minute PVT-B from the dashboard.

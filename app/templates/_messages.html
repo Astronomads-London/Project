@@ -1,0 +1,25 @@
+{# Shared list of messages between flight surgeons and astronauts.
+   link_astronaut: link each message to that astronaut's conversation (flight surgeon pages).
+   compact: shorten long messages (dashboards). #}
+{% macro message_list(messages, link_astronaut=false, compact=false) %}
+  <ol class="message-list{% if compact %} message-list--compact{% endif %}">
+    {% for message in messages %}
+      <li class="message {{ 'message--surgeon' if message.from_surgeon else 'message--astronaut' }}{% if message.new %} message--new{% endif %}">
+        <p class="message__meta">
+          <span class="message__sender">{{ message.sender }}</span>
+          <span>{{ 'Flight surgeon' if message.from_surgeon else 'Astronaut' }}</span>
+          {% if link_astronaut %}
+            {% if message.from_surgeon %}
+              <span>to <a href="{{ url_for('surgeon.treatment', username=message.astronaut) }}">{{ message.astronaut }}</a></span>
+            {% else %}
+              <a href="{{ url_for('surgeon.treatment', username=message.astronaut) }}">Open conversation</a>
+            {% endif %}
+          {% endif %}
+          <span>{{ message.sent }}</span>
+          {% if message.new %}<span class="message__new">New</span>{% endif %}
+        </p>
+        <p class="message__body">{{ message.body }}</p>
+      </li>
+    {% endfor %}
+  </ol>
+{% endmacro %}

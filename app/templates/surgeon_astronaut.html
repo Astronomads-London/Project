@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}{{ astronaut }} — Flight Surgeon — 11:56{% endblock %}
+{% block body_class %}dashboard{% endblock %}
+{% block page_class %}page--dashboard{% endblock %}
+
+{% block content %}
+<main class="dashboard surgeon">
+  <header class="dashboard__heading">
+    <p class="dashboard__eyebrow">FLIGHT SURGEON · ASTRONAUT RECORD</p>
+    <h1>{{ astronaut }}</h1>
+    <p class="dashboard__intro">{{ streak }} day logging streak</p>
+    <a class="dashboard__log-link" href="{{ url_for('surgeon.crew') }}"><span aria-hidden="true">←</span> All astronauts</a>
+    <a class="dashboard__log-link surgeon-record__treatment" href="{{ url_for('surgeon.treatment', username=astronaut) }}">Write a treatment <span aria-hidden="true">→</span></a>
+  </header>
+
+  <section class="dashboard-card surgeon-card" aria-labelledby="surgeon-profile-title">
+    <div>
+      <p class="dashboard-card__eyebrow">PROFILE</p>
+      <h2 id="surgeon-profile-title">Astronaut details</h2>
+    </div>
+    <dl class="surgeon-profile">
+      {% for label, value in profile %}
+        <div>
+          <dt>{{ label }}</dt>
+          <dd>{{ value }}</dd>
+        </div>
+      {% endfor %}
+    </dl>
+  </section>
+
+  <section class="dashboard-card surgeon-card" aria-labelledby="surgeon-flags-title">
+    <div>
+      <p class="dashboard-card__eyebrow">LAST {{ flag_days }} DAYS</p>
+      <h2 id="surgeon-flags-title">Flagged readings</h2>
+    </div>
+    {% if flags %}
+      <div class="surgeon-table-wrap">
+        <table class="surgeon-table">
+          <thead>
+            <tr>
+              <th scope="col">Logged</th>
+              <th scope="col">Reading</th>
+              <th scope="col">Value</th>
+              <th scope="col">Flag</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for flag in flags %}
+              <tr>
+                <th scope="row">{{ flag.day }}</th>
+                <td>{{ flag.name }}</td>
+                <td>{{ flag.reading }}</td>
+                <td><span class="surgeon-status surgeon-status--{{ 'critical' if flag.critical else 'concerning' }}">{{ flag.status }}</span></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="surgeon-empty">No reading outside its normal range was logged in the last {{ flag_days }} days.</p>
+    {% endif %}
+  </section>
+
+  <section class="metrics-grid" aria-label="Health metrics over the last seven days">
+    {% for chart in charts %}
+      <article class="dashboard-card metric-card" aria-labelledby="metric-title-{{ chart.field }}">
+        <div class="metric-card__heading">
+          <div>
+            <p class="dashboard-card__eyebrow">LAST 7 DAYS</p>
+            <h2 id="metric-title-{{ chart.field }}">{{ chart.title }}</h2>
+          </div>
+          <span class="metric-card__unit">{{ chart.unit }}</span>
+        </div>
+        <div class="metric-chart" data-chart="{{ chart.field }}" aria-label="Interactive {{ chart.title }} chart"></div>
+      </article>
+    {% endfor %}
+  </section>
+
+  <section class="dashboard-card surgeon-card" aria-labelledby="surgeon-pvt-title">
+    <div>
+      <p class="dashboard-card__eyebrow">ALERTNESS · LATEST {{ pvt_limit }} TESTS</p>
+      <h2 id="surgeon-pvt-title">Psychomotor Vigilance Tests</h2>
+    </div>
+    {% if pvt_rows %}
+      <div class="surgeon-table-wrap">
+        <table class="surgeon-table">
+          <thead>
+            <tr>
+              <th scope="col">Completed <small>UTC</small></th>
+              <th scope="col">Average response <small>ms</small></th>
+              <th scope="col">Lapses</th>
+              <th scope="col">False starts</th>
+              <th scope="col">Performance</th>
+              <th scope="col">Trials</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in pvt_rows %}
+              <tr>
+                <th scope="row">{{ row.completed }}</th>
+                <td>{{ row.average }}</td>
+                <td>{{ row.lapses }}</td>
+                <td>{{ row.false_starts }}</td>
+                <td>{{ row.performance }}</td>
+                <td>{{ row.trials }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="surgeon-empty">This astronaut has not completed a PVT yet.</p>
+    {% endif %}
+  </section>
+
+  <section class="dashboard-card surgeon-card" aria-labelledby="surgeon-logs-title">
+    <div>
+      <p class="dashboard-card__eyebrow">DAILY LOG · LAST {{ log_days }} DAYS</p>
+      <h2 id="surgeon-logs-title">Self-reported data</h2>
+    </div>
+    {% if log_rows %}
+      <div class="surgeon-table-wrap">
+        <table class="surgeon-table">
+          <thead>
+            <tr>
+              <th scope="col">Date</th>
+              {% for field, heading, unit in log_columns %}
+                <th scope="col">{{ heading }} <small>{{ unit }}</small></th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in log_rows %}
+              <tr>
+                <th scope="row">{{ row.date }}</th>
+                {% for cell in row.cells %}
+                  <td>
+                    {%- if cell.status -%}
+                      <span class="surgeon-status surgeon-status--{{ 'critical' if cell.status|lower == 'critical' else 'concerning' }}" title="{{ cell.status }}">{{ cell.text }}</span>
+                    {%- else -%}
+                      {{ cell.text }}
+                    {%- endif -%}
+                  </td>
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <p class="surgeon-note">Highlighted readings were outside their normal range.</p>
+    {% else %}
+      <p class="surgeon-empty">Nothing was logged in the last {{ log_days }} days.</p>
+    {% endif %}
+  </section>
+</main>
+
+<script src="{{ url_for('static', filename='metric-charts.js') }}"></script>
+<script>
+  renderMetricCharts({{ charts|tojson }});
+</script>
+{% endblock %}

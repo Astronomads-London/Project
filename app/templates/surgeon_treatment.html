@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% from "_messages.html" import message_list %}
+
+{% block title %}Treatment — Flight Surgeon — 11:56{% endblock %}
+{% block body_class %}dashboard{% endblock %}
+{% block page_class %}page--dashboard{% endblock %}
+
+{% block content %}
+<main class="dashboard surgeon">
+  <header class="dashboard__heading">
+    <p class="dashboard__eyebrow">FLIGHT SURGEON · TREATMENT</p>
+    <h1>Treatment</h1>
+    <p class="dashboard__intro">Send an astronaut instructions for looking after their health. They see them on their dashboard and messages page, and can reply.</p>
+  </header>
+
+  <section class="dashboard-card message-card" aria-labelledby="treatment-form-title">
+    <div>
+      <p class="dashboard-card__eyebrow">NEW MESSAGE</p>
+      <h2 id="treatment-form-title">Write a treatment</h2>
+    </div>
+    {% if astronauts %}
+      <form class="message-form" action="{{ url_for('surgeon.treatment') }}" method="post">
+        {% if sent %}
+          <p class="message-notice message-notice--success" role="status">Your message was sent to {{ selected }}.</p>
+        {% elif error %}
+          <p class="message-notice message-notice--error" role="alert">{{ error }}</p>
+        {% endif %}
+        <label>
+          <span>Astronaut</span>
+          <select name="astronaut" required>
+            <option value="" disabled {% if not selected %}selected{% endif %}>Select an astronaut</option>
+            {% for astronaut in astronauts %}
+              <option value="{{ astronaut }}" {% if astronaut == selected %}selected{% endif %}>{{ astronaut }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label>
+          <span>Treatment instructions</span>
+          <textarea name="message" maxlength="{{ max_length }}" placeholder="What should the astronaut do?" required></textarea>
+        </label>
+        <button type="submit">Send to astronaut</button>
+      </form>
+    {% else %}
+      <p class="message-empty">No astronauts have signed up yet.</p>
+    {% endif %}
+  </section>
+
+  <section class="dashboard-card message-card" aria-labelledby="treatment-messages-title">
+    <div>
+      <p class="dashboard-card__eyebrow">{{ 'CONVERSATION' if selected else 'ALL ASTRONAUTS' }} · NEWEST FIRST</p>
+      <h2 id="treatment-messages-title">{% if selected %}Messages with {{ selected }}{% else %}Recent messages{% endif %}</h2>
+    </div>
+    {% if selected %}
+      <p class="message-links">
+        <a href="{{ url_for('surgeon.treatment') }}">Show all astronauts</a>
+        <a href="{{ url_for('surgeon.astronaut', username=selected) }}">View {{ selected }}’s data</a>
+      </p>
+    {% endif %}
+    {% if messages %}
+      {{ message_list(messages, link_astronaut=not selected) }}
+    {% else %}
+      <p class="message-empty">{% if selected %}No messages with {{ selected }} yet.{% else %}No messages have been sent yet.{% endif %}</p>
+    {% endif %}
+  </section>
+</main>
+{% endblock %}

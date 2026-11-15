@@ -9,21 +9,32 @@
   <img src="{{ url_for('static', filename='assets/starfield.jpg') }}" alt="">
 </div>
 
-<main class="auth-card auth-card--signup">
+<main class="auth-card auth-card--signup{% if is_surgeon %} auth-card--surgeon{% endif %}">
   <h1 class="auth-card__title">Sign Up</h1>
 
   <form action="{{ url_for('api.register') }}" method="post">
-    <label class="field" style="--x:34; --y:91.97; --w:511.145">
+    <div class="account-type" role="radiogroup" aria-label="Account type">
+      <label>
+        <input type="radio" name="account_type" value="astronaut" {% if not is_surgeon %}checked{% endif %}>
+        <span>ASTRONAUT</span>
+      </label>
+      <label>
+        <input type="radio" name="account_type" value="flight_surgeon" {% if is_surgeon %}checked{% endif %}>
+        <span>FLIGHT SURGEON</span>
+      </label>
+    </div>
+
+    <label class="field" style="--x:34; --y:144; --w:511.145">
       <span class="field__label">USERNAME</span>
       <input class="field__input" type="text" name="username" placeholder="Astronaut39..." autocomplete="username" minlength="{{ username_length[0] }}" maxlength="{{ username_length[1] }}" pattern="[A-Za-z0-9._\-]+" title="{{ username_length[0] }} to {{ username_length[1] }} letters, numbers, dots, dashes or underscores" required>
     </label>
 
-    <label class="field" style="--x:34; --y:193.97; --w:511.145">
+    <label class="field" style="--x:34; --y:246; --w:511.145">
       <span class="field__label">PASSWORD</span>
       <input class="field__input" type="password" name="password" autocomplete="new-password" minlength="{{ password_length[0] }}" maxlength="{{ password_length[1] }}" required>
     </label>
 
-    <label class="field field--sm" style="--x:34; --y:296.97; --w:248">
+    <label class="field field--sm field--astronaut" style="--x:34; --y:348; --w:248">
       <span class="field__label">SEX</span>
       <select class="field__input field__select" name="sex" required>
         <option value="" selected disabled>Select</option>
@@ -32,40 +43,42 @@
       </select>
     </label>
 
-    <label class="field field--sm" style="--x:297; --y:295.97; --w:248">
+    <label class="field field--sm field--astronaut" style="--x:297; --y:348; --w:248">
       <span class="field__label">BIRTHDAY</span>
       <input class="field__input field__input--date" type="date" name="birthday" autocomplete="bday" min="{{ birthday_min }}" max="{{ birthday_max }}" required>
     </label>
 
-    <label class="field field--sm" style="--x:33; --y:396.97; --w:248">
+    <label class="field field--sm field--astronaut" style="--x:33; --y:449; --w:248">
       <span class="field__label">HEIGHT</span>
       <input class="field__input" type="number" name="height" placeholder="Centimetres" min="100" max="250" inputmode="decimal" step="any" data-no-leading-zero required>
     </label>
 
-    <label class="field field--sm" style="--x:297; --y:396.97; --w:248">
+    <label class="field field--sm field--astronaut" style="--x:297; --y:449; --w:248">
       <span class="field__label">BODY MASS</span>
       <input class="field__input" type="number" name="mass" placeholder="Kilograms" min="30" max="250" inputmode="decimal" step="any" data-no-leading-zero required>
     </label>
 
-    <label class="field" style="--x:34; --y:497; --w:511.145">
+    <label class="field field--invite" style="--x:34; --y:549; --w:511.145">
       <span class="field__label">INVITE CODE</span>
       <input class="field__input" type="password" name="invite_code" autocomplete="off" required>
     </label>
 
     {% if error %}
-      <p class="auth-card__error" style="position: absolute; top: calc(588 * var(--u)); left: 0; width: 100%; text-align: center; color: #ff6b6b; margin: 0; font-family: 'Inter', sans-serif; font-size: calc(14 * var(--u));">
+      <p class="auth-card__error auth-card__error--signup" style="position: absolute; left: 0; width: 100%; text-align: center; color: #ff6b6b; margin: 0; font-family: 'Inter', sans-serif; font-size: calc(14 * var(--u));">
         {%- if error == "invalid_username" %}Username: {{ username_length[0] }}–{{ username_length[1] }} letters, numbers, dots, dashes or underscores.
         {%- elif error == "invalid_password" %}Password must be {{ password_length[0] }} to {{ password_length[1] }} characters long.
         {%- elif error == "invalid_sex" %}Select Male or Female.
         {%- elif error == "invalid_birthday" %}{{ birthday_error }}
         {%- elif error == "invalid_height" %}Height must be between 100 and 250 cm.
         {%- elif error == "invalid_mass" %}Body mass must be between 30 and 250 kg.
+        {%- elif error == "invalid_invitecode" %}That invite code is not valid for {{ 'a flight surgeon' if is_surgeon else 'an astronaut' }} account.
+        {%- elif error == "username_exists" %}That username is already taken.
         {%- else %}{{ error }}
         {%- endif -%}
       </p>
     {% endif %}
 
-    <button class="btn btn--sm" type="submit" style="--x:140; --y:610; --w:271; --h:53.454">SIGN UP NOW</button>
+    <button class="btn btn--sm btn--signup" type="submit" style="--x:140; --y:662; --w:271; --h:53.454">SIGN UP NOW</button>
   </form>
   <a class="auth-card__link auth-card__link--login" href="{{ url_for('main.login') }}">Already registered? Log in</a>
 </main>
@@ -77,5 +90,22 @@
       input.setCustomValidity(/^0\d/.test(input.value.trim()) ? "Remove the leading zero." : "");
     });
   });
+
+  // Flight surgeons have no health profile: hide those fields and switch them
+  // off, so they are neither required nor sent.
+  (function() {
+    const card = document.querySelector(".auth-card--signup");
+    const update = () => {
+      const surgeon = card.querySelector('input[name="account_type"]:checked').value === "flight_surgeon";
+      card.classList.toggle("auth-card--surgeon", surgeon);
+      card.querySelectorAll(".field--astronaut .field__input").forEach((input) => {
+        input.disabled = surgeon;
+      });
+    };
+    card.querySelectorAll('input[name="account_type"]').forEach((choice) => {
+      choice.addEventListener("change", update);
+    });
+    update();
+  })();
 </script>
 {% endblock %}
