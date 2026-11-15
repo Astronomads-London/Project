@@ -3,7 +3,8 @@
 In space, the immune system of the astronauts are inherently at risk, due to constant exposure to radiation, poor sleep, and microgravity in space, which is when astronauts experience weightlessness and free fall. The changes in the astronauts' immune system often causes allergies and activates dormant viruses.
 Many details of how spacelflight affects the immune system are still unknown, and our software provides a platform for astronauts to track their immune health through logging their symptoms and recording results of blood and urine samples, which also helps scientists conduct experiments and have a better understanding of the space environment.
 
-![Image of an astronaut in space](images/immune_system_image.jpg)
+<img src="images/immune_system_image.jpg" alt="Image of an astronaut in space" width="428" height="571"/>
+
 *An astronaut in space, Source: https://www.pexels.com/photo/astronaut-in-space-suit-with-american-flag-39483014/*
 
 ## Risks
