@@ -16,6 +16,7 @@ def create_app():
     app.config["INVITE_CODE"] = os.environ.get("INVITE_CODE")
     # Signing up with this code instead creates a flight surgeon account.
     app.config["SURGEON_INVITE_CODE"] = os.environ.get("SURGEON_INVITE_CODE")
+    app.config["MONGO_URI"] = os.environ.get("MONGO_URI")
     app.register_blueprint(main_bp)
     app.register_blueprint(api_bp, url_prefix="/api")
     app.register_blueprint(learn_bp, url_prefix="/learn")

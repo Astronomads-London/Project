@@ -1,16 +1,20 @@
 import os
 from datetime import datetime, timezone, timedelta
+from pathlib import Path
 from typing import Optional
+from dotenv import load_dotenv
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 from pymongo import ASCENDING
 
-TEST_MONGODB_URI = "mongodb+srv://astronomads_db_user:h4LR4FActK0wkJJy@cluster0.bfvf9dg.mongodb.net/?"
-if not TEST_MONGODB_URI or not TEST_MONGODB_URI.strip():
-    raise RuntimeError("TEST_MONGODB_URI must be set")
+load_dotenv(Path(__file__).resolve().parent / ".env")
+
+MONGODB_URI = os.environ.get("MONGO_URI")
+if not MONGODB_URI or not MONGODB_URI.strip():
+    raise RuntimeError("MONGO_URI must be set in the .env file or environment")
 
 client = MongoClient(
-     TEST_MONGODB_URI,
+     MONGODB_URI,
      server_api=ServerApi("1")
 )
 
