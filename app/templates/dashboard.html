@@ -172,6 +172,12 @@
 
   <p id="dashboard-status" class="dashboard-status" role="status" aria-live="polite"></p>
 
+  <ul class="chart-legend" aria-label="Bar colours on the charts">
+    <li class="chart-legend__normal">Normal</li>
+    <li class="chart-legend__concerning">Concerning</li>
+    <li class="chart-legend__critical">Critical</li>
+  </ul>
+
   <section class="dashboard-card sleep-card" aria-labelledby="sleep-title">
     <div class="sleep-card__heading">
       <div>
@@ -200,7 +206,7 @@
 </main>
 
 <script src="{{ url_for('static', filename='urine-check.js') }}" defer></script>
-<script src="{{ url_for('static', filename='metric-charts.js') }}"></script>
+<script src="{{ url_for('static', filename='metric-charts.js', v='20261115-status') }}"></script>
 <script>
   (() => {
     const charts = {{ charts|tojson }};

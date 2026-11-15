@@ -63,11 +63,16 @@ window.renderMetricCharts = (charts) => {
       const height = Math.max(4, (reading / max) * (plot.bottom - plot.top));
       const rect = svgElement("rect", {
         x, y: plot.bottom, width: 52, height: 0, rx: 7,
-        class: `metric-chart__bar metric-chart__bar--${chart.field}`,
+        // The status class colours the bar green, yellow or red.
+        class: `metric-chart__bar metric-chart__bar--${chart.field}`
+          + (point.status ? ` metric-chart__bar--${point.status}` : ""),
         tabindex: 0,
         role: "img"
       });
-      const valueLabel = `${point.value} ${chart.unit}`;
+      const statusLabel = point.status
+        ? ` · ${point.status.charAt(0).toUpperCase()}${point.status.slice(1)}`
+        : "";
+      const valueLabel = `${point.value} ${chart.unit}${statusLabel}`;
       rect.setAttribute("aria-label", `${point.label}: ${valueLabel}`);
       const title = svgElement("title");
       title.textContent = `${point.label}: ${valueLabel}`;
