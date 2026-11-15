@@ -172,6 +172,8 @@ CONVERSION_LIMITS = {
     "feet": (0, 9),
     "inches": (0, 108),
     "pounds": (1, 600),
+    "cm": (0, 500),
+    "kg": (0, 500),
 }
 MAX_HEIGHT_INCHES = 108  # 9 ft
 
