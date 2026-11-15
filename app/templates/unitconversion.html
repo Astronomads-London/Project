@@ -15,31 +15,45 @@
 
   <div class="conversion-grid">
     <section class="conversion-card" aria-labelledby="height-conversion-title">
-      <h2 id="height-conversion-title">Height</h2>
-      <p>Feet and inches to centimetres</p>
-      <form class="conversion-form" data-conversion="height">
-        <label>
-          <span>Feet</span>
-          <input type="number" name="feet" min="{{ limits.feet[0] }}" max="{{ limits.feet[1] }}" step="any" inputmode="decimal" required>
-        </label>
-        <label>
-          <span>Inches</span>
-          <input type="number" name="inches" min="{{ limits.inches[0] }}" max="{{ limits.inches[1] }}" step="any" value="0" inputmode="decimal" required>
-        </label>
-        <button class="btn btn--sm" type="submit">CONVERT TO CM</button>
+      <div class="conversion-card__header">
+        <h2 id="height-conversion-title">Height</h2>
+        <button type="button" class="conversion-reverse-btn" id="height-reverse-btn" aria-label="Reverse height conversion" title="Reverse conversion">
+          Reverse ⇄
+        </button>
+      </div>
+      <p id="height-conversion-desc">Feet and inches to centimetres</p>
+      <form class="conversion-form" data-conversion="height" id="height-form">
+        <div class="conversion-form__fields" id="height-fields">
+          <label>
+            <span>Feet</span>
+            <input type="number" name="feet" min="{{ limits.feet[0] }}" max="{{ limits.feet[1] }}" step="any" inputmode="decimal" required>
+          </label>
+          <label>
+            <span>Inches</span>
+            <input type="number" name="inches" min="{{ limits.inches[0] }}" max="{{ limits.inches[1] }}" step="any" value="0" inputmode="decimal" required>
+          </label>
+        </div>
+        <button class="btn btn--sm" type="submit" id="height-submit-btn">CONVERT TO CM</button>
         <p class="conversion-result" aria-live="polite"></p>
       </form>
     </section>
 
     <section class="conversion-card" aria-labelledby="weight-conversion-title">
-      <h2 id="weight-conversion-title">Weight</h2>
-      <p>Pounds to kilograms</p>
-      <form class="conversion-form" data-conversion="weight">
-        <label>
-          <span>Pounds</span>
-          <input type="number" name="pounds" min="{{ limits.pounds[0] }}" max="{{ limits.pounds[1] }}" step="any" inputmode="decimal" required>
-        </label>
-        <button class="btn btn--sm" type="submit">CONVERT TO KG</button>
+      <div class="conversion-card__header">
+        <h2 id="weight-conversion-title">Weight</h2>
+        <button type="button" class="conversion-reverse-btn" id="weight-reverse-btn" aria-label="Reverse weight conversion" title="Reverse conversion">
+          Reverse ⇄
+        </button>
+      </div>
+      <p id="weight-conversion-desc">Pounds to kilograms</p>
+      <form class="conversion-form" data-conversion="weight" id="weight-form">
+        <div class="conversion-form__fields" id="weight-fields">
+          <label class="conversion-form__single">
+            <span>Pounds</span>
+            <input type="number" name="pounds" min="{{ limits.pounds[0] }}" max="{{ limits.pounds[1] }}" step="any" inputmode="decimal" required>
+          </label>
+        </div>
+        <button class="btn btn--sm" type="submit" id="weight-submit-btn">CONVERT TO KG</button>
         <p class="conversion-result" aria-live="polite"></p>
       </form>
     </section>
