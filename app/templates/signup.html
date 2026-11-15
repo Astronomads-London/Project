@@ -34,17 +34,17 @@
 
     <label class="field field--sm" style="--x:297; --y:295.97; --w:248">
       <span class="field__label">BIRTHDAY</span>
-      <input class="field__input field__input--date" type="date" name="birthday" autocomplete="bday" required>
+      <input class="field__input field__input--date" type="date" name="birthday" autocomplete="bday" min="{{ birthday_min }}" max="{{ birthday_max }}" required>
     </label>
 
     <label class="field field--sm" style="--x:33; --y:396.97; --w:248">
       <span class="field__label">HEIGHT</span>
-      <input class="field__input" type="number" name="height" placeholder="Centimetres" min="0" inputmode="decimal" step="any">
+      <input class="field__input" type="number" name="height" placeholder="Centimetres" min="100" max="250" inputmode="decimal" step="any" data-no-leading-zero>
     </label>
 
     <label class="field field--sm" style="--x:297; --y:396.97; --w:248">
       <span class="field__label">BODY MASS</span>
-      <input class="field__input" type="number" name="mass" placeholder="Kilograms" min="0" inputmode="decimal" step="any">
+      <input class="field__input" type="number" name="mass" placeholder="Kilograms" min="30" max="250" inputmode="decimal" step="any" data-no-leading-zero>
     </label>
 
     <label class="field" style="--x:34; --y:497; --w:511.145">
@@ -53,11 +53,26 @@
     </label>
 
     {% if error %}
-      <p class="auth-card__error" style="position: absolute; top: calc(588 * var(--u)); left: 0; width: 100%; text-align: center; color: #ff6b6b; margin: 0; font-family: 'Inter', sans-serif; font-size: calc(14 * var(--u));">{{ error }}</p>
+      <p class="auth-card__error" style="position: absolute; top: calc(588 * var(--u)); left: 0; width: 100%; text-align: center; color: #ff6b6b; margin: 0; font-family: 'Inter', sans-serif; font-size: calc(14 * var(--u));">
+        {%- if error == "invalid_birthday" %}Birthday must be between {{ birthday_min }} and {{ birthday_max }}.
+        {%- elif error == "invalid_height" %}Height must be between 100 and 250 cm.
+        {%- elif error == "invalid_mass" %}Body mass must be between 30 and 250 kg.
+        {%- else %}{{ error }}
+        {%- endif -%}
+      </p>
     {% endif %}
 
     <button class="btn btn--sm" type="submit" style="--x:140; --y:610; --w:271; --h:53.454">SIGN UP NOW</button>
   </form>
   <a class="auth-card__link auth-card__link--login" href="{{ url_for('main.login') }}">Already registered? Log in</a>
 </main>
+
+<script>
+  // Number inputs accept zero-padded values such as "0180"; block them before submit.
+  document.querySelectorAll("input[data-no-leading-zero]").forEach((input) => {
+    input.addEventListener("input", () => {
+      input.setCustomValidity(/^0\d/.test(input.value.trim()) ? "Remove the leading zero." : "");
+    });
+  });
+</script>
 {% endblock %}

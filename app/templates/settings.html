@@ -35,17 +35,17 @@
 
           <label class="settings-field">
             <span class="settings-field__label">BIRTHDAY</span>
-            <input class="settings-field__input" type="date" name="birthday" id="setting-birthday" value="{{ user.birthday or '1995-04-12' }}" required>
+            <input class="settings-field__input" type="date" name="birthday" id="setting-birthday" value="{{ user.birthday or '1995-04-12' }}" min="{{ birthday_min }}" max="{{ birthday_max }}" required>
           </label>
 
           <label class="settings-field">
             <span class="settings-field__label">HEIGHT (CM)</span>
-            <input class="settings-field__input" type="number" name="height" id="setting-height" placeholder="e.g. 175" min="0" step="any" value="{{ user.height if (user.height is defined and user.height is not none and user.height != '') else 175 }}" required>
+            <input class="settings-field__input" type="number" name="height" id="setting-height" placeholder="e.g. 175" min="100" max="250" step="any" data-no-leading-zero value="{{ user.height if (user.height is defined and user.height is not none and user.height != '') else 175 }}" required>
           </label>
 
           <label class="settings-field">
             <span class="settings-field__label">BODY MASS (KG)</span>
-            <input class="settings-field__input" type="number" name="mass" id="setting-mass" placeholder="e.g. 70" min="0" step="any" value="{{ user.mass if (user.mass is defined and user.mass is not none and user.mass != '') else 70 }}" required>
+            <input class="settings-field__input" type="number" name="mass" id="setting-mass" placeholder="e.g. 70" min="30" max="250" step="any" data-no-leading-zero value="{{ user.mass if (user.mass is defined and user.mass is not none and user.mass != '') else 70 }}" required>
           </label>
         </div>
       </section>
@@ -141,6 +141,13 @@
     } catch (e) {
       // Local storage fallback
     }
+
+    // Number inputs accept zero-padded values such as "0180"; block them before submit.
+    form.querySelectorAll("input[data-no-leading-zero]").forEach(function(input) {
+      input.addEventListener("input", function() {
+        input.setCustomValidity(/^0\d/.test(input.value.trim()) ? "Remove the leading zero." : "");
+      });
+    });
 
     form.addEventListener("submit", async function(event) {
       event.preventDefault();

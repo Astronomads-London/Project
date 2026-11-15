@@ -1,5 +1,6 @@
 from flask import Blueprint, redirect, render_template, session, request
 from datetime import datetime, timedelta, timezone
+from app.utils.birthday import birthday_limits
 from app.utils.greeting import get_gmt_greeting
 import db
 
@@ -23,7 +24,13 @@ def register():
     if "username" in session:
         return redirect("/dashboard")
     else:
-        return render_template("register.html", error=request.args.get("error"))
+        birthday_min, birthday_max = birthday_limits()
+        return render_template(
+            "register.html",
+            error=request.args.get("error"),
+            birthday_min=birthday_min.isoformat(),
+            birthday_max=birthday_max.isoformat(),
+        )
 
 
 @main_bp.route("/signup", methods=["GET", "POST"])
@@ -119,12 +126,15 @@ def settings():
         return redirect("/login")
 
     user = db.get_user(session["username"]) or {}
+    birthday_min, birthday_max = birthday_limits()
 
     return render_template(
         "settings.html",
         username=session["username"],
         user=user,
         today_gmt=datetime.now(timezone.utc).date().isoformat(),
+        birthday_min=birthday_min.isoformat(),
+        birthday_max=birthday_max.isoformat(),
     )
 
 

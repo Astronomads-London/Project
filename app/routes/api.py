@@ -1,9 +1,10 @@
 import math
 import re
-from datetime import date, datetime, timezone
+from datetime import datetime, timezone
 
 from flask import Blueprint, current_app, request, redirect, session, jsonify
 from auth import auth_login, hash_password
+from app.utils.birthday import birthday_limits, parse_birthday
 from app.utils.unitconversion import height_to_cm, pounds_to_kg
 import db
 
@@ -22,6 +23,35 @@ TODAY_DATA_FIELDS = {
     "exercise": (0, 1440),
 }
 PVT_OUTCOMES = {"commission", "false_start", "response", "lapse", "omission", "truncated"}
+# Accepted range for the profile measurements: height in cm, mass in kg.
+# The min/max attributes on the sign-up and settings forms mirror these.
+PROFILE_LIMITS = {
+    "height": (100, 250),
+    "mass": (30, 250),
+}
+PROFILE_LIMIT_ERRORS = {
+    "height": "Height must be between 100 and 250 cm, with no leading zeros.",
+    "mass": "Body mass must be between 30 and 250 kg, with no leading zeros.",
+}
+# Plain decimal only: no leading zeros, signs or exponents ("0180", "+70", "1e2").
+_PLAIN_NUMBER = re.compile(r"[1-9]\d*(?:\.\d+)?")
+
+
+def _parse_profile_measurement(field, raw):
+    """Return raw as a float within PROFILE_LIMITS[field], or None if it is not acceptable."""
+    if isinstance(raw, bool):
+        return None
+    if isinstance(raw, (int, float)):
+        value = float(raw)
+    elif isinstance(raw, str) and _PLAIN_NUMBER.fullmatch(raw.strip()):
+        value = float(raw.strip())
+    else:
+        return None
+
+    low, high = PROFILE_LIMITS[field]
+    if not math.isfinite(value) or not low <= value <= high:
+        return None
+    return value
 
 
 def _percentile(values, percentile):
@@ -348,32 +378,24 @@ def edit_settings():
         updates["sex"] = str(data["sex"]).strip()
 
     if "birthday" in data and data["birthday"]:
-        try:
-            bday = date.fromisoformat(str(data["birthday"]).strip())
-            if bday > date.today():
-                return jsonify(error="Birthday cannot be in the future."), 400
-            updates["birthday"] = bday.isoformat()
-        except ValueError:
-            return jsonify(error="Invalid birthday format."), 400
+        bday = parse_birthday(data["birthday"])
+        if bday is None:
+            earliest, latest = birthday_limits()
+            return jsonify(error=f"Birthday must be between {earliest.isoformat()} and {latest.isoformat()}."), 400
+        updates["birthday"] = bday.isoformat()
 
     if "height" in data and data["height"] not in (None, ""):
-        try:
-            height = float(data["height"])
-            if not math.isfinite(height) or height < 0:
-                raise ValueError
-            updates["height"] = height
-        except (TypeError, ValueError):
-            return jsonify(error="Invalid height."), 400
+        height = _parse_profile_measurement("height", data["height"])
+        if height is None:
+            return jsonify(error=PROFILE_LIMIT_ERRORS["height"]), 400
+        updates["height"] = height
 
     mass_val = data.get("mass") if "mass" in data else (data.get("body-mass") or data.get("body_mass") or data.get("weight"))
     if mass_val not in (None, ""):
-        try:
-            mass = float(mass_val)
-            if not math.isfinite(mass) or mass < 0:
-                raise ValueError
-            updates["mass"] = mass
-        except (TypeError, ValueError):
-            return jsonify(error="Invalid mass."), 400
+        mass = _parse_profile_measurement("mass", mass_val)
+        if mass is None:
+            return jsonify(error=PROFILE_LIMIT_ERRORS["mass"]), 400
+        updates["mass"] = mass
 
     if "water_target" in data and data["water_target"] not in (None, ""):
         try:
@@ -478,12 +500,24 @@ def register():
     if invitecode != expected_invite_code:
         return redirect("/register?error=invalid_invitecode")
 
-    try:
-        birthday = date.fromisoformat(birthday_value)
-        if birthday > date.today():
-            raise ValueError
-    except ValueError:
+    birthday = parse_birthday(birthday_value)
+    if birthday is None:
         return redirect("/register?error=invalid_birthday")
+
+    # Height and mass are optional at sign-up, but must be sensible when given.
+    if height not in (None, ""):
+        height = _parse_profile_measurement("height", height)
+        if height is None:
+            return redirect("/register?error=invalid_height")
+    else:
+        height = None
+
+    if mass not in (None, ""):
+        mass = _parse_profile_measurement("mass", mass)
+        if mass is None:
+            return redirect("/register?error=invalid_mass")
+    else:
+        mass = None
 
     if db.user_exists(username):
         return redirect("/register?error=username_exists")
