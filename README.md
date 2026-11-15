@@ -19,6 +19,24 @@
 > 
 > Password: `OneGiantLeap`
 
+----
+### 💻 How to register an account
+An Invite Code is required so only Astronauts and Flight Surgeons can create an account. Here are the invite codes you can use to test it:
+
+**🧑‍⚕️ Flight Surgeon:** `654321`
+
+**🧑‍🚀 Astronaut:** `123456` 
+
+
+## Screenshots
+![Home](/docs/home.png)
+
+![Astro Dashboard](/docs/astro_dash.png)
+
+![FS Dashboard](/docs/flightsurgeon.png)
+
+![Graph](/docs/graph.png)
+
 ## Tools
 ![PyCharm](https://img.shields.io/badge/PyCharm-000000.svg?style=for-the-badge&logo=PyCharm&logoColor=white) ![Figma](https://img.shields.io/badge/Figma-F24E1E.svg?style=for-the-badge&logo=Figma&logoColor=white)
 
