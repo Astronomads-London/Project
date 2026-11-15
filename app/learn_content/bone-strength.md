@@ -34,7 +34,7 @@ Type I collagen makes up most of organic bone. When osteoclasts break down bone,
 
 ### Blood biomarkers
 
-* High CTX1 levels: More CTX1 means that bone is being broken down faster by osteoclasts
+* High CTX1 levels: More CTX1 means that bone is being broken down faster by osteoclasts.
 * TRAP5b: an enzyme released by osteoclasts, indicating how many are active. More TRAP5b means 
  more bones are breaking down faster.
 
