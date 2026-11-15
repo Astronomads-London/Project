@@ -129,6 +129,12 @@ def settings():
 
 
 
+@main_bp.route("/aboutus", methods=["GET"])
+@main_bp.route("/about", methods=["GET"])
+def aboutus():
+    return render_template("aboutus.html")
+
+
 @main_bp.route("/privacy", methods=["GET"])
 def privacy_redirect():
     return redirect("/policies/privacy")
