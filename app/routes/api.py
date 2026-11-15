@@ -1,26 +1,39 @@
 import math
-import re
-from datetime import date, datetime, timezone
+from datetime import datetime, timezone
 
 from flask import Blueprint, current_app, request, redirect, session, jsonify
 from auth import auth_login, hash_password
+from app.utils.birthday import birthday_error, parse_birthday
+from app.utils.bloodpressure import BLOOD_PRESSURE_ERROR, parse_blood_pressure
 from app.utils.unitconversion import height_to_cm, pounds_to_kg
+from app.utils.validation import (
+    CONVERSION_LIMITS,
+    DAY_TOTAL_ERROR,
+    ENVIRONMENT_CHOICES,
+    PASSWORD_MAX_LENGTH,
+    PASSWORD_MIN_LENGTH,
+    PROFILE_LIMIT_ERRORS,
+    SEX_CHOICES,
+    TODAY_DATA_FIELDS,
+    USERNAME_PATTERN,
+    check_height_conversion,
+    day_total_ok,
+    is_hydration_choice,
+    launch_date_error,
+    parse_launch_date,
+    parse_number,
+    parse_profile_measurement,
+    parse_settings_number,
+    pvt_start_time_ok,
+    settings_number_error,
+    today_data_error,
+)
 import db
 
 
 api_bp = Blueprint("api", __name__)
 
 TEMP_REFCODE = "123456"  # Temporary referral code for testing purposes
-TODAY_DATA_FIELDS = {
-    "resting_heart_rate": (20, 250),
-    "body_temp": (30, 45),
-    "o2_level": (50, 100),
-    "glucose_level": (20, 600),
-    "breaths_per_min": (1, 80),
-    "water": (0, 20000),
-    "sleep_hours": (0, 24),
-    "exercise": (0, 1440),
-}
 PVT_OUTCOMES = {"commission", "false_start", "response", "lapse", "omission", "truncated"}
 
 
@@ -129,6 +142,8 @@ def save_pvt_results():
             raise ValueError
     except (KeyError, TypeError, ValueError):
         return jsonify(error="Provide a valid timezone-aware start time."), 400
+    if not pvt_start_time_ok(started_at):
+        return jsonify(error="The test start time must be within the last 24 hours."), 400
 
     if data.get("duration_ms") != 180000:
         return jsonify(error="PVT-B runs must last exactly 180000 milliseconds."), 400
@@ -235,36 +250,35 @@ def edit_today():
         return jsonify(error="User not found."), 404
 
     updates = {}
-    for field, (minimum, maximum) in TODAY_DATA_FIELDS.items():
+    for field, (minimum, maximum, decimals) in TODAY_DATA_FIELDS.items():
         value = data.get(field)
         if value in (None, ""):
             continue
-        try:
-            number = float(value)
-            if not math.isfinite(number) or not minimum <= number <= maximum:
-                raise ValueError
-            updates[field] = int(number) if number.is_integer() else number
-        except (TypeError, ValueError):
-            message = f"Enter a valid {field.replace('_', ' ')} value."
+        number = parse_number(value, minimum, maximum, decimals)
+        if number is None:
             if is_json_request:
-                return jsonify(error=message), 400
+                return jsonify(error=today_data_error(field)), 400
             return redirect("/today?error=invalid")
+        updates[field] = number
+
+    # Sleep and exercise have to fit in one day, counting what is already logged.
+    if "sleep_hours" in updates or "exercise" in updates:
+        logged = db.get_today_data(username) or {}
+        sleep_hours = updates.get("sleep_hours", logged.get("sleep_hours"))
+        exercise_minutes = updates.get("exercise", logged.get("exercise"))
+        if not day_total_ok(sleep_hours, exercise_minutes):
+            if is_json_request:
+                return jsonify(error=DAY_TOTAL_ERROR), 400
+            return redirect("/today?error=day_total")
 
     blood_pressure = data.get("blood_pressure")
     if blood_pressure not in (None, ""):
-        match = re.fullmatch(r"\s*(\d{2,3})\s*/\s*(\d{2,3})\s*", str(blood_pressure))
-        if not match:
-            message = "Enter blood pressure as systolic/diastolic, for example 120/80."
+        reading = parse_blood_pressure(blood_pressure)
+        if reading is None:
             if is_json_request:
-                return jsonify(error=message), 400
-            return redirect("/today?error=invalid")
-        systolic, diastolic = (int(value) for value in match.groups())
-        if not 40 <= systolic <= 300 or not 20 <= diastolic <= 200 or systolic <= diastolic:
-            message = "Enter a valid systolic/diastolic blood pressure reading."
-            if is_json_request:
-                return jsonify(error=message), 400
-            return redirect("/today?error=invalid")
-        updates["blood_pressure"] = f"{systolic}/{diastolic}"
+                return jsonify(error=BLOOD_PRESSURE_ERROR), 400
+            return redirect("/today?error=blood_pressure")
+        updates["blood_pressure"] = reading
 
     if not updates:
         message = "Enter at least one value to update."
@@ -304,16 +318,17 @@ def unit_conversion():
     if conversion not in required_fields:
         return jsonify(error="Choose a supported conversion."), 400
 
-    try:
-        for field in required_fields[conversion]:
-            value = float(data[field])
-            if not math.isfinite(value) or value < 0:
-                raise ValueError
-            values[field] = value
-    except (KeyError, TypeError, ValueError):
-        return jsonify(error="Enter valid non-negative numbers."), 400
+    for field in required_fields[conversion]:
+        low, high = CONVERSION_LIMITS[field]
+        value = parse_number(data.get(field), low, high)
+        if value is None:
+            return jsonify(error=f"{field.capitalize()} must be between {low} and {high}, with no leading zeros."), 400
+        values[field] = value
 
     if conversion == "height":
+        problem = check_height_conversion(values["feet"], values["inches"])
+        if problem:
+            return jsonify(error=problem), 400
         result = height_to_cm(values["feet"], values["inches"])
         return jsonify(result=f"{result:.2f} cm")
 
@@ -344,87 +359,67 @@ def edit_settings():
 
     updates = {}
 
-    if "sex" in data and data["sex"] is not None:
-        updates["sex"] = str(data["sex"]).strip()
+    if data.get("sex") not in (None, ""):
+        sex = data["sex"].strip() if isinstance(data["sex"], str) else None
+        if sex not in SEX_CHOICES:
+            return jsonify(error="Sex must be Male or Female."), 400
+        updates["sex"] = sex
 
     if "birthday" in data and data["birthday"]:
-        try:
-            bday = date.fromisoformat(str(data["birthday"]).strip())
-            if bday > date.today():
-                return jsonify(error="Birthday cannot be in the future."), 400
-            updates["birthday"] = bday.isoformat()
-        except ValueError:
-            return jsonify(error="Invalid birthday format."), 400
+        bday = parse_birthday(data["birthday"])
+        if bday is None:
+            return jsonify(error=birthday_error()), 400
+        updates["birthday"] = bday.isoformat()
 
     if "height" in data and data["height"] not in (None, ""):
-        try:
-            height = float(data["height"])
-            if not math.isfinite(height) or height < 0:
-                raise ValueError
-            updates["height"] = height
-        except (TypeError, ValueError):
-            return jsonify(error="Invalid height."), 400
+        height = parse_profile_measurement("height", data["height"])
+        if height is None:
+            return jsonify(error=PROFILE_LIMIT_ERRORS["height"]), 400
+        updates["height"] = height
 
     mass_val = data.get("mass") if "mass" in data else (data.get("body-mass") or data.get("body_mass") or data.get("weight"))
     if mass_val not in (None, ""):
-        try:
-            mass = float(mass_val)
-            if not math.isfinite(mass) or mass < 0:
-                raise ValueError
-            updates["mass"] = mass
-        except (TypeError, ValueError):
-            return jsonify(error="Invalid mass."), 400
+        mass = parse_profile_measurement("mass", mass_val)
+        if mass is None:
+            return jsonify(error=PROFILE_LIMIT_ERRORS["mass"]), 400
+        updates["mass"] = mass
 
-    if "water_target" in data and data["water_target"] not in (None, ""):
-        try:
-            water = float(data["water_target"])
-            if not math.isfinite(water) or water < 0:
-                raise ValueError
-            updates["water_target"] = int(water) if water.is_integer() else water
-        except (TypeError, ValueError):
-            return jsonify(error="Invalid water target."), 400
-
-    if "exercise_target" in data and data["exercise_target"] not in (None, ""):
-        try:
-            exercise = float(data["exercise_target"])
-            if not math.isfinite(exercise) or exercise < 0:
-                raise ValueError
-            updates["exercise_target"] = int(exercise) if exercise.is_integer() else exercise
-        except (TypeError, ValueError):
-            return jsonify(error="Invalid exercise target."), 400
-
-    if "sleep_target" in data and data["sleep_target"] not in (None, ""):
-        try:
-            sleep = float(data["sleep_target"])
-            if not math.isfinite(sleep) or sleep < 0 or sleep > 24:
-                raise ValueError
-            updates["sleep_target"] = sleep
-        except (TypeError, ValueError):
-            return jsonify(error="Invalid sleep target."), 400
+    for field in ("water_target", "exercise_target", "sleep_target"):
+        if data.get(field) in (None, ""):
+            continue
+        target = parse_settings_number(field, data[field])
+        if target is None:
+            return jsonify(error=settings_number_error(field)), 400
+        updates[field] = float(target) if field == "sleep_target" else target
 
     reminder_val = data.get("hydration_reminders") if "hydration_reminders" in data else data.get("hydration_reminder")
     if reminder_val not in (None, ""):
+        if not is_hydration_choice(reminder_val):
+            return jsonify(error="Choose one of the listed hydration reminder options."), 400
         updates["hydration_reminders"] = str(reminder_val)
         updates["hydration_reminder"] = reminder_val
 
-    if "environment" in data and data["environment"] not in (None, ""):
-        updates["environment"] = str(data["environment"]).strip()
+    if data.get("environment") not in (None, ""):
+        environment = data["environment"].strip().lower() if isinstance(data["environment"], str) else None
+        if environment not in ENVIRONMENT_CHOICES:
+            return jsonify(error="Environment must be ISS, Mars or Moon."), 400
+        updates["environment"] = environment
 
     launch_val = data.get("launch_date") if "launch_date" in data else data.get("mission_start")
     if launch_val not in (None, ""):
-        updates["launch_date"] = str(launch_val).strip()
-        updates["mission_start"] = str(launch_val).strip()
+        launch = parse_launch_date(launch_val)
+        if launch is None:
+            return jsonify(error=launch_date_error()), 400
+        updates["launch_date"] = launch.isoformat()
+        updates["mission_start"] = launch.isoformat()
 
     mission_len = data.get("mission_length") if "mission_length" in data else data.get("mission_duration")
     if mission_len not in (None, ""):
-        try:
-            duration = float(mission_len)
-            if not math.isfinite(duration) or duration < 1:
-                raise ValueError
-            updates["mission_length"] = int(duration) if duration.is_integer() else duration
-            updates["mission_duration"] = int(duration) if duration.is_integer() else duration
-        except (TypeError, ValueError):
-            return jsonify(error="Invalid mission length."), 400
+        duration = parse_settings_number("mission_length", mission_len)
+        if duration is None:
+            return jsonify(error=settings_number_error("mission_length")), 400
+        updates["mission_length"] = duration
+        updates["mission_duration"] = duration
 
     if not updates:
         return jsonify(error="No valid settings to update."), 400
@@ -462,8 +457,8 @@ def login():
 
 @api_bp.route("/register", methods=["POST"])
 def register():
-    username = request.form.get("username")
-    password = request.form.get("password")
+    username = (request.form.get("username") or "").strip()
+    password = request.form.get("password") or ""
     birthday_value = request.form.get("birthday", "")
     height = request.form.get("height")
     mass = request.form.get("mass") or request.form.get("body-mass")
@@ -478,12 +473,27 @@ def register():
     if invitecode != expected_invite_code:
         return redirect("/register?error=invalid_invitecode")
 
-    try:
-        birthday = date.fromisoformat(birthday_value)
-        if birthday > date.today():
-            raise ValueError
-    except ValueError:
+    if not USERNAME_PATTERN.fullmatch(username):
+        return redirect("/register?error=invalid_username")
+
+    if not PASSWORD_MIN_LENGTH <= len(password) <= PASSWORD_MAX_LENGTH:
+        return redirect("/register?error=invalid_password")
+
+    if sex not in SEX_CHOICES:
+        return redirect("/register?error=invalid_sex")
+
+    birthday = parse_birthday(birthday_value)
+    if birthday is None:
         return redirect("/register?error=invalid_birthday")
+
+    # Every profile field is required at sign-up, so a blank value is rejected too.
+    height = parse_profile_measurement("height", height)
+    if height is None:
+        return redirect("/register?error=invalid_height")
+
+    mass = parse_profile_measurement("mass", mass)
+    if mass is None:
+        return redirect("/register?error=invalid_mass")
 
     if db.user_exists(username):
         return redirect("/register?error=username_exists")
