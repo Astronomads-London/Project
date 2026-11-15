@@ -32,6 +32,11 @@
         {% endfor %}
       </div>
     {% endif %}
+    <div class="dashboard__missing-alert-container" id="missing-alert-container" {% if not missing_health_data_alert %}style="display: none;"{% endif %}>
+      <div class="dashboard-alert dashboard-alert--missing" id="missing-data-alert">
+        <p id="missing-data-text">{{ missing_health_data_alert or '' }}</p>
+      </div>
+    </div>
   </header>
 
   <dialog class="urine-check" id="urine-check-dialog" aria-labelledby="urine-check-title">
@@ -199,6 +204,42 @@
     let savedWater = water;
     let exercise = Number({{ (today_data.exercise or 0)|tojson }});
     const status = document.getElementById("dashboard-status");
+    const currentTodayData = {{ (today_data or {})|tojson }};
+    const healthDataFields = [
+      { key: "resting_heart_rate", alt: "heart_rate", label: "resting heart rate" },
+      { key: "body_temp", alt: "temperature", label: "body temperature" },
+      { key: "o2_level", alt: "blood_oxygen", label: "blood oxygen" },
+      { key: "glucose_level", alt: null, label: "glucose" },
+      { key: "blood_pressure", alt: null, label: "blood pressure" },
+      { key: "breaths_per_min", alt: "breathing_rate", label: "breaths per minute" },
+      { key: "water", alt: null, label: "water intake" },
+      { key: "sleep_hours", alt: null, label: "sleep" },
+      { key: "exercise", alt: null, label: "exercise" }
+    ];
+
+    const updateMissingDataAlert = () => {
+      const missing = [];
+      for (const field of healthDataFields) {
+        let val = currentTodayData[field.key];
+        if ((val === null || val === undefined || val === "") && field.alt) {
+          val = currentTodayData[field.alt];
+        }
+        if (val === null || val === undefined || val === "") {
+          missing.push(field.label);
+        }
+      }
+      const container = document.getElementById("missing-alert-container");
+      const textEl = document.getElementById("missing-data-text");
+      if (!container || !textEl) return;
+
+      if (missing.length > 0) {
+        textEl.textContent = `Please enter ${missing.join(", ")} for today`;
+        container.style.display = "";
+      } else {
+        textEl.textContent = "";
+        container.style.display = "none";
+      }
+    };
 
     const waterAmount = document.getElementById("water-amount");
     const waterSlider = document.getElementById("water-level");
@@ -228,6 +269,8 @@
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || "Could not save your update.");
         status.textContent = "Today's data saved.";
+        currentTodayData[field] = value;
+        updateMissingDataAlert();
       } catch (error) {
         status.textContent = error.message || "Could not save your update.";
         return false;

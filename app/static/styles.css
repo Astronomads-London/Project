@@ -1981,6 +1981,17 @@ body.dashboard.env-moon {
   border: 1px solid rgba(202, 232, 247, 0.35);
 }
 
+.dashboard-alert--missing {
+  background-color: #fff3bf;
+  color: #493800;
+  border: 1px solid rgba(240, 201, 75, 0.45);
+}
+
+.dashboard__missing-alert-container {
+  margin-top: 16px;
+  max-width: 100%;
+}
+
 .page--pvt {
   min-height: 100vh;
   background:

@@ -136,6 +136,37 @@ def dashboard():
                 except Exception:
                     pass
 
+    missing_fields = []
+    health_data_items = [
+        ("resting_heart_rate", "resting heart rate"),
+        ("body_temp", "body temperature"),
+        ("o2_level", "blood oxygen"),
+        ("glucose_level", "glucose"),
+        ("blood_pressure", "blood pressure"),
+        ("breaths_per_min", "breaths per minute"),
+        ("water", "water intake"),
+        ("sleep_hours", "sleep"),
+        ("exercise", "exercise"),
+    ]
+    aliases = {
+        "resting_heart_rate": "heart_rate",
+        "body_temp": "temperature",
+        "o2_level": "blood_oxygen",
+        "breaths_per_min": "breathing_rate",
+    }
+    for key, label in health_data_items:
+        val = today_data.get(key) if today_data else None
+        if (val is None or val == "") and key in aliases and today_data:
+            val = today_data.get(aliases[key])
+        if val is None or val == "":
+            missing_fields.append(label)
+
+    missing_health_data_alert = (
+        f"Please enter {', '.join(missing_fields)} for today"
+        if missing_fields
+        else None
+    )
+
     return render_template(
         "dashboard.html",
         username=username,
@@ -145,6 +176,7 @@ def dashboard():
         user=user,
         charts=charts,
         alerts=alerts,
+        missing_health_data_alert=missing_health_data_alert,
         is_female=is_female,
     )
 
