@@ -14,9 +14,9 @@ Blood vessels are affected too: after six months in space, carotid artery stiffn
 In space, chronic unloading also blunts the sensitivity of the carotid and aortic baroreceptors, because they no longer have to counteract gravity [6]. As a result, when astronauts return to Earth, the baroreflex cannot produce an appropriate vasoconstrictive response (narrowing of blood vessels) or chronotropic response (increase in heart rate). This can cause light-headedness, postural tachycardia (an abnormally high heart rate on standing) or presyncope (feeling close to fainting) [1, 6].
 
 
-![CSA astronaut David Saint-Jacques performs an ultrasound on himself aboard the International Space Station](https://www.nasa.gov/wp-content/uploads/2020/01/1_david-saint-jacques-vescular.jpg)
+![CSA astronaut David Saint-Jacques performs an ultrasound on himself aboard the International Space Station](images/cardiovascular_image.webp)
 
-*CSA astronaut David Saint-Jacques performs an ultrasound for the Vascular Echo experiment aboard the International Space Station. Source: Canadian Space Agency/NASA (NASA, 2023).*
+*CSA astronaut David Saint-Jacques performs an ultrasound for the Vascular Echo experiment aboard the International Space Station. Source: Canadian Space Agency/NASA (NASA, 2023). https://www.nasa.gov/wp-content/uploads/2020/01/1_david-saint-jacques-vescular.jpg*
 
 >## References
 >[1] NASA (2023) *Cardiovascular Health in Microgravity*. Available at: https://www.nasa.gov/missions/station/cardiovascular-health-in-microgravity/ (Accessed: 15 November 2026).
