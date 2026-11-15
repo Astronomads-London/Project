@@ -1,5 +1,9 @@
 # Immune System
 
+Published: 15th November 2026
+
+----
+
 In space, the immune system of the astronauts are inherently at risk, due to constant exposure to radiation, poor sleep, and microgravity in space, which is when astronauts experience weightlessness and free fall. The changes in the astronauts' immune system often causes allergies and activates dormant viruses.
 Many details of how spacelflight affects the immune system are still unknown, and our software provides a platform for astronauts to track their immune health through logging their symptoms and recording results of blood and urine samples, which also helps scientists conduct experiments and have a better understanding of the space environment.
 
@@ -13,7 +17,7 @@ Different factors work together to compromise the immune system of astronauts in
 ## Experiments
 Scientists have conducted a variety of experiments to investigate changes to the astronauts' immune system in space. For example, in the Artemis II mission, blood and saliva samples of the astronauts are collected before, during and after the mission, to study how stress hormones, cells and viruses change during spaceflight. It was found out that the varicella-zoster virus which causes shingles is often reawakened in space, which can cause painful rashes, although many astronauts do not have any symptoms.
 
-## References
+## Sources:
 > 1. NASA. (2024). Risk of Altered Immune System Responses - NASA. [online] Available at: https://www.nasa.gov/reference/risk-of-altered-immune-system-responses/ [Accessed 15 Nov. 2026].
 > 2. Garbarino, S., Lanteri, P., Bragazzi, N.L., Magnavita, N. and Scoditti, E. (2021). Role of sleep deprivation in immune-related disease risk and outcomes. Communications Biology, [online] 4(1). doi:10.1038/s42003-021-02825-4.
 > 3. NASA. (2025). Immune biomarkers - NASA. [online] Available at: https://www.nasa.gov/reference/immune-biomarkers/ [Accessed 15 Nov. 2026].

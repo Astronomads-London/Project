@@ -11,11 +11,18 @@
     <h1>{{ greeting }}, {{ username }}!</h1>
     <p class="dashboard__intro">Here’s your mission health snapshot.</p>
     <a class="dashboard__log-link" href="{{ url_for('main.today_data') }}">Edit today’s health data <span aria-hidden="true">→</span></a>
-    <a class="dashboard__pvt-link" href="{{ url_for('main.pvt') }}">
-      <span class="dashboard__pvt-kicker">3-MINUTE ALERTNESS CHECK</span>
-      <span class="dashboard__pvt-title">Brief Psychomotor Vigilance Test</span>
-      <span class="dashboard__pvt-action">Start PVT-B <span aria-hidden="true">→</span></span>
-    </a>
+    <div class="dashboard__health-tools" aria-label="Crew health checks">
+      <a class="dashboard__pvt-link" href="{{ url_for('main.pvt') }}">
+        <span class="dashboard__pvt-kicker">3-MINUTE ALERTNESS CHECK</span>
+        <span class="dashboard__pvt-title">Brief Psychomotor Vigilance Test</span>
+        <span class="dashboard__pvt-action">Start PVT-B <span aria-hidden="true">→</span></span>
+      </a>
+      <button class="dashboard__pvt-link dashboard__urine-link" id="open-urine-check" type="button" aria-haspopup="dialog" aria-controls="urine-check-dialog">
+        <span class="dashboard__pvt-kicker">CREW HEALTH CHECK</span>
+        <span class="dashboard__pvt-title">Urine Check</span>
+        <span class="dashboard__pvt-action">Check biomarkers <span aria-hidden="true">→</span></span>
+      </button>
+    </div>
     {% if alerts %}
       <div class="dashboard__alerts">
         {% for alert in alerts %}
@@ -26,6 +33,49 @@
       </div>
     {% endif %}
   </header>
+
+  <dialog class="urine-check" id="urine-check-dialog" aria-labelledby="urine-check-title">
+    <div class="urine-check__panel">
+      <header class="urine-check__header">
+        <div>
+          <p class="dashboard__pvt-kicker">CREW HEALTH CHECK</p>
+          <h2 id="urine-check-title">Urine Check</h2>
+        </div>
+        <button class="urine-check__close" type="button" aria-label="Close urine check" data-close-urine-check>×</button>
+      </header>
+      <p class="urine-check__notice">Enter your urine biomarker values to see whether they pass this check. This result is not a diagnosis or medical advice; contact your flight surgeon with questions.</p>
+      <p class="urine-check__notice urine-check__period-notice" id="urine-period-privacy" {% if not is_female %}hidden{% endif %}>Your period response is used only for this check and is not stored in the database.</p>
+      <form class="urine-check__form" id="urine-check-form" data-sex="{{ 'female' if is_female else 'male' }}" data-endpoint="{{ url_for('api.urine_check') }}">
+        <label>
+          <span>Calcium (CA)</span>
+          <input name="ca" type="number" min="0" max="1000000" step="any" inputmode="decimal" required>
+        </label>
+        <label>
+          <span>N-telopeptide (NTX)</span>
+          <input name="ntx" type="number" min="0" max="1000000" step="any" inputmode="decimal" required>
+        </label>
+        <label>
+          <span>C-telopeptide-1 (CTX1)</span>
+          <input name="ctx1" type="number" min="0" max="1000000" step="any" inputmode="decimal" required>
+        </label>
+        <label>
+          <span>Pyridinoline</span>
+          <input name="pyridinoline" type="number" min="0" max="1000000" step="any" inputmode="decimal" required>
+        </label>
+        <fieldset class="urine-check__period" id="urine-period-field" {% if not is_female %}hidden disabled{% endif %}>
+          <legend>Have you reached menopause?</legend>
+          <label><input type="radio" name="period" value="true" required> Yes</label>
+          <label><input type="radio" name="period" value="false" required> No</label>
+        </fieldset>
+        <p class="urine-check__result" id="urine-check-result" role="status" aria-live="polite"></p>
+        <p class="urine-check__error" id="urine-check-error" role="alert"></p>
+        <button class="dashboard__pvt-link urine-check__submit" type="submit">
+          <span class="dashboard__pvt-action">Check result <span aria-hidden="true">→</span></span>
+        </button>
+      </form>
+      <p class="urine-check__privacy">This check is not stored in the database.</p>
+    </div>
+  </dialog>
 
   <section class="dashboard__overview" aria-label="Daily wellness overview">
     <article class="dashboard-card dashboard-card--water">
@@ -132,6 +182,7 @@
   </section>
 </main>
 
+<script src="{{ url_for('static', filename='urine-check.js') }}" defer></script>
 <script>
   (() => {
     const charts = {{ charts|tojson }};
