@@ -16,7 +16,7 @@ def urine(s, ca, ntx, ctx1, pyridinoline,period):
     else:
         if 100 <= ca <= 250:
             normal_ca = True
-        if not period:
+        if period:
             if 150 <= ctx1 <= 400:
                 normal_ctx1 = True
             if 5<=ntx<=65:
