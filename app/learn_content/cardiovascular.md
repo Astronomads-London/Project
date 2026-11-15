@@ -1,25 +1,36 @@
-# Cardiovascular Health 
+# Cardiovascular Health
 
-Author: John Doe
-
-Published: 14th November 2026
+Published: 15th November 2026
 
 ----
+In microgravity, the cardiovascular system undergoes deconditioning due to the loss of hydrostatic pressure gradients (the rate at which fluid pressure increases with vertical depth). Without gravity pulling blood towards the lower body, fluid shifts upwards from the legs and abdomen towards the heart and head [1].
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ullamcorper lectus semper turpis pellentesque, ac interdum dui congue. Nullam luctus nibh at orci aliquet euismod. Nunc porttitor vulputate venenatis. Donec ac tempus nisl. Maecenas scelerisque non est sit amet cursus. Proin sit amet dui tortor. Morbi dictum at sapien ac euismod. Praesent dui neque, pellentesque vel lobortis et, pulvinar bibendum mauris. Sed sodales egestas arcu mollis tristique. Nunc ut fermentum eros. Proin malesuada volutpat turpis quis sollicitudin. Pellentesque feugiat mauris sed metus lacinia porttitor. Sed turpis ante, cursus viverra sem at, blandit dignissim urna. Ut cursus dictum odio, vitae venenatis orci efficitur ut. Aenean a sem augue. Phasellus ac ante ut mi facilisis semper rhoncus eu mauris.
+Upon entering orbit, approximately 2 litres of fluid shifts from the legs towards the thorax and head [2]. This distends the internal jugular veins [3] and causes facial oedema (fluid accumulation in facial tissue) [1]. The central baroreceptors (which detect changes in blood pressure) interpret the extra fluid in the thorax as hypervolaemia (fluid overload). This was traditionally thought to trigger increased renal fluid excretion [4]; however, in-flight studies suggest that reduced fluid intake plays a larger role [5]. As a result, blood plasma volume falls by 10–15% [6].
 
-![Image of a bone](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqgXd4pZUKkxEPozU5TrrzqUJ2CbW7dhRlATA0prs3Zu1cgq5yb_68EG6h&s=10)
-*Image Description, Source*
+Because the heart no longer pumps against a 1G hydrostatic column, myocardial workload decreases, leading to myocardial atrophy [1]. Left ventricular mass has been shown to fall by around 12% after spaceflight [7], and stroke volume also decreases [6].
 
-Etiam feugiat aliquam felis, eu faucibus nisl maximus sit amet. Pellentesque vel venenatis augue, et sodales arcu. Quisque aliquam tempus vehicula. Donec varius volutpat orci nec feugiat. Suspendisse eget rutrum est, et mollis ex. Ut et velit non odio interdum feugiat ut a ligula. Mauris eu posuere dui. Mauris ultricies ex lorem, eu fermentum augue porta nec. Pellentesque laoreet dolor nec interdum gravida. Fusce sed lacinia felis, in fringilla ligula. Curabitur vel sem faucibus, euismod massa id, placerat nunc.
+Blood vessels are affected too: after six months in space, carotid artery stiffness increases by an amount comparable to 10–20 years of ageing on Earth [8].
 
-> Fun Fact: 
+In space, chronic unloading also blunts the sensitivity of the carotid and aortic baroreceptors, because they no longer have to counteract gravity [6]. As a result, when astronauts return to Earth, the baroreflex cannot produce an appropriate vasoconstrictive response (narrowing of blood vessels) or chronotropic response (increase in heart rate). This can cause light-headedness, postural tachycardia (an abnormally high heart rate on standing) or presyncope (feeling close to fainting) [1, 6].
 
-Cras rhoncus placerat neque non bibendum. Nunc porta odio sed dolor commodo feugiat. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum ut felis ut arcu vulputate finibus. Nunc ultrices, odio et tempus elementum, nisl sem pretium sem, at venenatis ipsum tortor sed risus. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Praesent a erat commodo, hendrerit felis ac, ultricies ipsum. Etiam non elit lorem. Fusce ac orci metus. Phasellus pretium interdum sapien et vehicula. Aliquam erat volutpat. In hac habitasse platea dictumst. Sed mauris magna, tincidunt non rhoncus nec, gravida sit amet ex. Sed ornare ipsum ultricies, euismod augue eget, maximus libero. Mauris convallis tincidunt ipsum, sed scelerisque neque egestas quis.
 
-Phasellus in nibh sit amet ex ornare dapibus. Nulla venenatis dolor ut lorem blandit porttitor id non erat. Phasellus porta, massa et sollicitudin eleifend, felis libero feugiat tortor, pharetra finibus nunc magna vitae turpis. Nunc cursus metus metus, vel bibendum lectus interdum sit amet. Nam eu magna erat. Morbi a diam eget felis gravida posuere. In hac habitasse platea dictumst. Sed pellentesque nisl id nibh pulvinar porttitor.
+![CSA astronaut David Saint-Jacques performs an ultrasound on himself aboard the International Space Station](https://www.nasa.gov/wp-content/uploads/2020/01/1_david-saint-jacques-vescular.jpg)
 
-Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Maecenas molestie erat eros, sed facilisis quam interdum nec. Suspendisse ullamcorper lacus imperdiet euismod tincidunt. Proin sed dapibus lectus. Quisque ut malesuada urna, in sodales dolor. Aenean non nisl viverra enim porttitor viverra. Suspendisse potenti. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vivamus a pellentesque risus, vitae mollis augue. Duis ullamcorper quam a leo luctus feugiat. Duis eget ipsum eros. Suspendisse potenti. Cras eu iaculis diam, non vulputate nibh. Sed faucibus, purus vel iaculis pulvinar, nulla nisl malesuada nulla, sed facilisis elit nunc vitae lorem. Nam non cursus augue. Quisque laoreet nec lacus semper sagittis.
+*CSA astronaut David Saint-Jacques performs an ultrasound for the Vascular Echo experiment aboard the International Space Station. Source: Canadian Space Agency/NASA (NASA, 2023).*
 
-> Sources:
-> 1. National Institutes of Health (2023) - [Bone Health and Osteoporosis](https://www.niams.nih.gov/health-topics/bone-health-and-osteoporosis) [Accessed 14th November 2026]
+>## References
+>[1] NASA (2023) *Cardiovascular Health in Microgravity*. Available at: https://www.nasa.gov/missions/station/cardiovascular-health-in-microgravity/ (Accessed: 15 November 2026).
+> 
+> [2] NASA (n.d.) *Ensuring Astronaut Health*. Available at: https://www.nasa.gov/?p=207552 (Accessed: 15 November 2026).
+> 
+> [3] Arbeille, P. *et al.* (2021) 'Lower body negative pressure reduces jugular and portal vein volumes and counteracts the elevation of middle cerebral vein velocity during long-duration spaceflight', *Journal of Applied Physiology*, 131(3), pp. 1080–1087. Available at: https://pmc.ncbi.nlm.nih.gov/articles/PMC8461809/ (Accessed: 15 November 2026).
+> 
+> [4] Williams, D. *et al.* (2009) 'Acclimation during space flight: effects on human physiology', *Canadian Medical Association Journal*, 180(13), pp. 1317–1323. doi: 10.1503/cmaj.090628.
+> 
+> [5] Olde Engberink, R.H.G. *et al.* (2023) 'The kidney, volume homeostasis and osmoregulation in space: current perspective and knowledge gaps', *npj Microgravity*, 9, 29. doi: 10.1038/s41526-023-00268-1.
+> 
+> [6] Silburn, A. (2025) 'Counteracting microgravity: preserving cardiovascular health in low earth orbit', *Military Medical Research*, 12, 53. doi: 10.1186/s40779-025-00642-y.
+> 
+> [7] Perhonen, M.A. *et al.* (2001) 'Cardiac atrophy after bed rest and spaceflight', *Journal of Applied Physiology*, 91(2), pp. 645–653. doi: 10.1152/jappl.2001.91.2.645.
+> 
+> [8] Hughson, R.L. *et al.* (2016) 'Increased postflight carotid artery stiffness and inflight insulin resistance resulting from 6-mo spaceflight in male and female astronauts', *American Journal of Physiology – Heart and Circulatory Physiology*, 310(5), pp. H628–H638.
