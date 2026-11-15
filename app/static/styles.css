@@ -1485,6 +1485,13 @@ body.dashboard.env-moon {
   text-underline-offset: 0.15em;
 }
 
+.learn-content img {
+  max-width: 100%;
+  height: auto;
+  margin: 0 0 calc(20 * var(--u));
+  border-radius: calc(8 * var(--u));
+}
+
 .learn-content blockquote {
   padding-left: calc(20 * var(--u));
   border-left: calc(3 * var(--u)) solid var(--color-muted);

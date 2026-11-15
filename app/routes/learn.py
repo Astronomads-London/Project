@@ -2,11 +2,19 @@ import re
 from pathlib import Path
 
 import markdown
-from flask import Blueprint, abort, render_template
+from flask import Blueprint, abort, render_template, send_from_directory
 from markupsafe import Markup
 
 learn_bp = Blueprint("learn", __name__)
 LEARN_CONTENT_DIR = Path(__file__).resolve().parents[1] / "learn_content"
+LEARN_IMAGES_DIR = LEARN_CONTENT_DIR / "images"
+
+
+# The markdown files reference images as "images/<file>", which the browser
+# resolves to /learn/images/<file> from a /learn/<slug> page.
+@learn_bp.route("/images/<path:filename>", methods=["GET"])
+def learn_image(filename):
+    return send_from_directory(LEARN_IMAGES_DIR, filename)
 
 
 @learn_bp.route("/<slug>", methods=["GET"])
