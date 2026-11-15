@@ -27,25 +27,25 @@
           <label class="settings-field">
             <span class="settings-field__label">SEX</span>
             <select class="settings-field__input" name="sex" id="setting-sex" required>
-              <option value="" disabled {% if not user.sex %}selected{% endif %}>Select sex</option>
-              <option value="Male" {% if user.sex == 'Male' or not user.sex %}selected{% endif %}>Male</option>
+              <option value="" disabled {% if user.sex not in ('Male', 'Female') %}selected{% endif %}>Select sex</option>
+              <option value="Male" {% if user.sex == 'Male' %}selected{% endif %}>Male</option>
               <option value="Female" {% if user.sex == 'Female' %}selected{% endif %}>Female</option>
             </select>
           </label>
 
           <label class="settings-field">
             <span class="settings-field__label">BIRTHDAY</span>
-            <input class="settings-field__input" type="date" name="birthday" id="setting-birthday" value="{{ user.birthday or '1995-04-12' }}" required>
+            <input class="settings-field__input" type="date" name="birthday" id="setting-birthday" value="{{ user.birthday or '1995-04-12' }}" min="{{ birthday_min }}" max="{{ birthday_max }}" required>
           </label>
 
           <label class="settings-field">
             <span class="settings-field__label">HEIGHT (CM)</span>
-            <input class="settings-field__input" type="number" name="height" id="setting-height" placeholder="e.g. 175" min="0" step="any" value="{{ user.height if (user.height is defined and user.height is not none and user.height != '') else 175 }}" required>
+            <input class="settings-field__input" type="number" name="height" id="setting-height" placeholder="e.g. 175" min="100" max="250" step="any" data-no-leading-zero value="{{ user.height if (user.height is defined and user.height is not none) else '' }}" required>
           </label>
 
           <label class="settings-field">
             <span class="settings-field__label">BODY MASS (KG)</span>
-            <input class="settings-field__input" type="number" name="mass" id="setting-mass" placeholder="e.g. 70" min="0" step="any" value="{{ user.mass if (user.mass is defined and user.mass is not none and user.mass != '') else 70 }}" required>
+            <input class="settings-field__input" type="number" name="mass" id="setting-mass" placeholder="e.g. 70" min="30" max="250" step="any" data-no-leading-zero value="{{ user.mass if (user.mass is defined and user.mass is not none) else '' }}" required>
           </label>
         </div>
       </section>
@@ -58,17 +58,17 @@
         <div class="settings-fields">
           <label class="settings-field">
             <span class="settings-field__label">DAILY WATER TARGET (ML)</span>
-            <input class="settings-field__input" type="number" name="water_target" id="setting-water" placeholder="e.g. 2500" min="0" step="50" value="{{ user.water_target if (user.water_target is defined and user.water_target is not none and user.water_target != '') else 2500 }}" required>
+            <input class="settings-field__input" type="number" name="water_target" id="setting-water" placeholder="e.g. 2500" min="{{ limits.water_target[0] }}" max="{{ limits.water_target[1] }}" step="50" data-no-leading-zero value="{{ user.water_target if (user.water_target is defined and user.water_target is not none and user.water_target != '') else 2500 }}" required>
           </label>
 
           <label class="settings-field">
             <span class="settings-field__label">DAILY EXERCISE TARGET (MINUTES)</span>
-            <input class="settings-field__input" type="number" name="exercise_target" id="setting-exercise" placeholder="e.g. 60" min="0" step="5" value="{{ user.exercise_target if (user.exercise_target is defined and user.exercise_target is not none and user.exercise_target != '') else 60 }}" required>
+            <input class="settings-field__input" type="number" name="exercise_target" id="setting-exercise" placeholder="e.g. 60" min="{{ limits.exercise_target[0] }}" max="{{ limits.exercise_target[1] }}" step="5" data-no-leading-zero value="{{ user.exercise_target if (user.exercise_target is defined and user.exercise_target is not none and user.exercise_target != '') else 60 }}" required>
           </label>
 
           <label class="settings-field">
             <span class="settings-field__label">DAILY SLEEP TARGET (HOURS)</span>
-            <input class="settings-field__input" type="number" name="sleep_target" id="setting-sleep" placeholder="e.g. 8.0" min="0" max="24" step="0.5" value="{{ user.sleep_target if (user.sleep_target is defined and user.sleep_target is not none and user.sleep_target != '') else 8.0 }}" required>
+            <input class="settings-field__input" type="number" name="sleep_target" id="setting-sleep" placeholder="e.g. 8.0" min="{{ limits.sleep_target[0] }}" max="{{ limits.sleep_target[1] }}" step="0.5" data-no-leading-zero value="{{ user.sleep_target if (user.sleep_target is defined and user.sleep_target is not none and user.sleep_target != '') else 8.0 }}" required>
           </label>
 
           <label class="settings-field">
@@ -99,12 +99,12 @@
 
           <label class="settings-field">
             <span class="settings-field__label">LAUNCH DATE</span>
-            <input class="settings-field__input" type="date" name="launch_date" id="setting-launch-date" value="{{ user.launch_date if user.launch_date else today_gmt }}" required>
+            <input class="settings-field__input" type="date" name="launch_date" id="setting-launch-date" value="{{ (user.launch_date|string)[:10] if user.launch_date else today_gmt }}" min="{{ launch_min }}" max="{{ launch_max }}" required>
           </label>
 
           <label class="settings-field">
             <span class="settings-field__label">MISSION LENGTH (DAYS)</span>
-            <input class="settings-field__input" type="number" name="mission_length" id="setting-mission-length" placeholder="e.g. 180" min="1" max="2000" value="{{ user.mission_length or user.mission_duration or 180 }}" required>
+            <input class="settings-field__input" type="number" name="mission_length" id="setting-mission-length" placeholder="e.g. 180" min="{{ limits.mission_length[0] }}" max="{{ limits.mission_length[1] }}" step="1" data-no-leading-zero value="{{ user.mission_length or user.mission_duration or 180 }}" required>
           </label>
         </div>
       </section>
@@ -141,6 +141,13 @@
     } catch (e) {
       // Local storage fallback
     }
+
+    // Number inputs accept zero-padded values such as "0180"; block them before submit.
+    form.querySelectorAll("input[data-no-leading-zero]").forEach(function(input) {
+      input.addEventListener("input", function() {
+        input.setCustomValidity(/^0\d/.test(input.value.trim()) ? "Remove the leading zero." : "");
+      });
+    });
 
     form.addEventListener("submit", async function(event) {
       event.preventDefault();
