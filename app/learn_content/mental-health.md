@@ -8,8 +8,8 @@ Published: 15th November 2026
 Spending time in space leads to confinement and isolation. This results in decrements in cognitive function, which may not affect the crew immediately but pose great risk in the future (NASA, 2025) [1]. There is an estimated 0.22 per astronaut mission incidence of depression and anxiety (Slack et al., 2016) [2].
 
 
-![Image of a bone](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqgXd4pZUKkxEPozU5TrrzqUJ2CbW7dhRlATA0prs3Zu1cgq5yb_68EG6h&s=10)
-*Image Description, Source*
+![Image of crying VR](https://cdn.mos.cms.futurecdn.net/AiugGGEGLdgeCGXBjxhjeh-970-80.jpg.webp)
+*Image of crying person with a VR headset, Source: NASA*
 
 ## Causes
 
