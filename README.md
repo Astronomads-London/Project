@@ -1,8 +1,10 @@
 # Project
 
-## Test Accounts:
-Username: Flight-Surgeon1
-Password: flightsurgeon
+[View live demo](https://project1-kbp72xbpi-astronomads.vercel.app/)
 
-Username: Neil
-Password: OneGiantLeap
+## Test Accounts:
+Username: `Flight-Surgeon1`
+Password: `flightsurgeon`
+
+Username: `Neil`
+Password: `OneGiantLeap`
