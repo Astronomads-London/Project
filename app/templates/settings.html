@@ -121,26 +121,6 @@
   (function() {
     const form = document.getElementById("settings-form");
     const statusBox = document.getElementById("settings-status");
-    const STORAGE_KEY = "astronomads_user_settings";
-
-    // Load saved settings from localStorage if available
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const data = JSON.parse(saved);
-        if (data.mission_start && !data.launch_date) {
-          data.launch_date = data.mission_start;
-        }
-        Object.entries(data).forEach(([key, val]) => {
-          const field = form.elements[key];
-          if (field && val !== undefined && val !== null && val !== "") {
-            field.value = val;
-          }
-        });
-      }
-    } catch (e) {
-      // Local storage fallback
-    }
 
     // Number inputs accept zero-padded values such as "0180"; block them before submit.
     form.querySelectorAll("input[data-no-leading-zero]").forEach(function(input) {
@@ -167,10 +147,6 @@
         });
 
         if (response.ok) {
-          try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(settingsObj));
-          } catch (e) {}
-
           statusBox.textContent = "Settings successfully updated.";
           statusBox.className = "settings-status settings-status--success";
         } else {

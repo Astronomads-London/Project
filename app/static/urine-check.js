@@ -28,7 +28,6 @@
     const payload = {
       ca: Number(formData.get("ca")),
       ntx: Number(formData.get("ntx")),
-      ctx1: Number(formData.get("ctx1")),
       pyridinoline: Number(formData.get("pyridinoline"))
     };
     if (form.dataset.sex === "female") {

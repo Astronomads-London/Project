@@ -63,14 +63,15 @@ window.renderMetricCharts = (charts) => {
       const height = Math.max(4, (reading / max) * (plot.bottom - plot.top));
       const rect = svgElement("rect", {
         x, y: plot.bottom, width: 52, height: 0, rx: 7,
-        class: `metric-chart__bar metric-chart__bar--${chart.field}`,
+        class: `metric-chart__bar metric-chart__bar--${point.status ? point.status.toLowerCase() : "unrated"}`,
         tabindex: 0,
         role: "img"
       });
       const valueLabel = `${point.value} ${chart.unit}`;
-      rect.setAttribute("aria-label", `${point.label}: ${valueLabel}`);
+      const statusLabel = point.status ? `, ${point.status}` : "";
+      rect.setAttribute("aria-label", `${point.label}: ${valueLabel}${statusLabel}`);
       const title = svgElement("title");
-      title.textContent = `${point.label}: ${valueLabel}`;
+      title.textContent = `${point.label}: ${valueLabel}${statusLabel}`;
       rect.appendChild(title);
       svg.appendChild(rect);
       requestAnimationFrame(() => {

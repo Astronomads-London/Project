@@ -72,10 +72,6 @@
           <input name="ntx" type="number" min="0" max="1000000" step="any" inputmode="decimal" required>
         </label>
         <label>
-          <span>C-telopeptide-1 (CTX1)</span>
-          <input name="ctx1" type="number" min="0" max="1000000" step="any" inputmode="decimal" required>
-        </label>
-        <label>
           <span>Pyridinoline</span>
           <input name="pyridinoline" type="number" min="0" max="1000000" step="any" inputmode="decimal" required>
         </label>
@@ -172,6 +168,12 @@
 
   <p id="dashboard-status" class="dashboard-status" role="status" aria-live="polite"></p>
 
+  <ul class="metric-chart-legend" aria-label="Chart reading status">
+    <li><span class="metric-chart-legend__swatch metric-chart-legend__swatch--normal" aria-hidden="true"></span>Normal</li>
+    <li><span class="metric-chart-legend__swatch metric-chart-legend__swatch--concerning" aria-hidden="true"></span>Concerning</li>
+    <li><span class="metric-chart-legend__swatch metric-chart-legend__swatch--critical" aria-hidden="true"></span>Critical</li>
+  </ul>
+
   <section class="dashboard-card sleep-card" aria-labelledby="sleep-title">
     <div class="sleep-card__heading">
       <div>
@@ -200,7 +202,7 @@
 </main>
 
 <script src="{{ url_for('static', filename='urine-check.js') }}" defer></script>
-<script src="{{ url_for('static', filename='metric-charts.js') }}"></script>
+<script src="{{ url_for('static', filename='metric-charts.js', v='20261115-chart-status') }}"></script>
 <script>
   (() => {
     const charts = {{ charts|tojson }};

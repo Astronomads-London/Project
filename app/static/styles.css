@@ -530,6 +530,53 @@ a { color: inherit; }
   -moz-appearance: textfield;
 }
 
+.field--password .field__input {
+  padding-right: calc(78 * var(--u));
+}
+
+.password-toggle {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  right: calc(16 * var(--u));
+  display: grid;
+  width: calc(42 * var(--u));
+  height: calc(42 * var(--u));
+  padding: calc(7 * var(--u));
+  place-items: center;
+  transform: translateY(-35%);
+  border: 0;
+  border-radius: calc(6 * var(--u));
+  background: transparent;
+  color: var(--color-body);
+  cursor: pointer;
+}
+
+.password-toggle:hover,
+.password-toggle:focus-visible {
+  background: rgba(255, 255, 255, 0.12);
+  outline: 2px solid var(--color-ink);
+  outline-offset: 1px;
+}
+
+.password-toggle svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.password-toggle__slash {
+  display: none;
+}
+
+.password-toggle[aria-pressed="true"] .password-toggle__slash {
+  display: block;
+}
+
 .field__input::-webkit-outer-spin-button,
 .field__input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
@@ -1768,13 +1815,37 @@ body.dashboard.env-moon {
   transition: y 650ms cubic-bezier(0.2, 0.7, 0.2, 1), height 650ms cubic-bezier(0.2, 0.7, 0.2, 1), filter 150ms ease;
 }
 
-.metric-chart__bar--resting_heart_rate { fill: #f2b766; }
-.metric-chart__bar--glucose_level { fill: #c28ae8; }
-.metric-chart__bar--blood_pressure { fill: #f17e8e; }
-.metric-chart__bar--water { fill: #59cbe7; }
-.metric-chart__bar--breaths_per_min { fill: #74d6a2; }
-.metric-chart__bar--o2_level { fill: #72a8f4; }
-.metric-chart__bar--body_temp { fill: #ef986d; }
+.metric-chart__bar--normal { fill: #48c78e; }
+.metric-chart__bar--concerning { fill: #f5a623; }
+.metric-chart__bar--critical { fill: #ef5350; }
+.metric-chart__bar--unrated { fill: #91a4b0; }
+
+.metric-chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.metric-chart-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #c1d0d9;
+  font: 12px "Inter", sans-serif;
+}
+
+.metric-chart-legend__swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.metric-chart-legend__swatch--normal { background: #48c78e; }
+.metric-chart-legend__swatch--concerning { background: #f5a623; }
+.metric-chart-legend__swatch--critical { background: #ef5350; }
 
 .metric-chart__bar:hover,
 .metric-chart__bar:focus-visible {
