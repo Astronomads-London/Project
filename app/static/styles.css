@@ -1776,6 +1776,39 @@ body.dashboard.env-moon {
 .metric-chart__bar--o2_level { fill: #72a8f4; }
 .metric-chart__bar--body_temp { fill: #ef986d; }
 
+.metric-chart__bar--good { fill: #53d69a; }
+.metric-chart__bar--concerning { fill: #ffc15c; }
+.metric-chart__bar--critical { fill: #ff5964; }
+.metric-chart__bar--neutral { fill: #75bce8; }
+
+.metric-chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin: 20px 0 12px;
+  padding: 0;
+  color: #d3dee6;
+  font: 12px "Inter", sans-serif;
+  list-style: none;
+}
+
+.metric-chart-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.metric-chart-legend__swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.metric-chart-legend__swatch--good { background: #53d69a; }
+.metric-chart-legend__swatch--concerning { background: #ffc15c; }
+.metric-chart-legend__swatch--critical { background: #ff5964; }
+.metric-chart-legend__swatch--neutral { background: #75bce8; }
+
 .metric-chart__bar:hover,
 .metric-chart__bar:focus-visible {
   filter: brightness(1.35) drop-shadow(0 0 7px currentColor);
