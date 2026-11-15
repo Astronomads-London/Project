@@ -1776,39 +1776,38 @@ body.dashboard.env-moon {
 .metric-chart__bar--o2_level { fill: #72a8f4; }
 .metric-chart__bar--body_temp { fill: #ef986d; }
 
-/* A bar with a health status takes that status's colour instead. */
-.metric-chart__bar--normal { fill: #5fd38d; }
-.metric-chart__bar--concerning { fill: #f5cf4b; }
-.metric-chart__bar--critical { fill: #f0616d; }
+.metric-chart__bar--good { fill: #53d69a; }
+.metric-chart__bar--concerning { fill: #ffc15c; }
+.metric-chart__bar--critical { fill: #ff5964; }
+.metric-chart__bar--neutral { fill: #75bce8; }
 
-.chart-legend {
+.metric-chart-legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 22px;
-  margin: clamp(16px, calc(22 * var(--u)), 28px) 0 0;
+  gap: 8px 18px;
+  margin: 20px 0 12px;
   padding: 0;
-  color: #c3ceda;
-  font: 13px "Inter", sans-serif;
+  color: #d3dee6;
+  font: 12px "Inter", sans-serif;
   list-style: none;
 }
 
-.chart-legend li {
-  display: flex;
+.metric-chart-legend li {
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
 }
 
-.chart-legend li::before {
-  width: 12px;
-  height: 12px;
-  border-radius: 3px;
-  background: currentColor;
-  content: "";
+.metric-chart-legend__swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
 }
 
-.chart-legend__normal::before { color: #5fd38d; }
-.chart-legend__concerning::before { color: #f5cf4b; }
-.chart-legend__critical::before { color: #f0616d; }
+.metric-chart-legend__swatch--good { background: #53d69a; }
+.metric-chart-legend__swatch--concerning { background: #ffc15c; }
+.metric-chart-legend__swatch--critical { background: #ff5964; }
+.metric-chart-legend__swatch--neutral { background: #75bce8; }
 
 .metric-chart__bar:hover,
 .metric-chart__bar:focus-visible {

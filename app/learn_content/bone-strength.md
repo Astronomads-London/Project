@@ -25,8 +25,8 @@ Biomarkers don't directly measure bone density, but biomarkers change quickly wi
 
 ## Urine biomarkers
 
-* High levels of C-Telopeptide-1 (CTX1) and N-telopeptide (NTX):
-Type I collagen makes up most of organic bone. When osteoclasts break down bone, the collagen is destroyed, releasing small C-Telopeptide and N-Telopeptide fragments, which end up in the urine. In microgravity, there is an expected 50-80% rise in CTX1 and NTX.
+* High levels of N-telopeptide (NTX):
+Type I collagen makes up most of organic bone. When osteoclasts break down bone, the collagen is destroyed, releasing small N-Telopeptide fragments, which end up in the urine. In microgravity, there is an expected 50-80% rise in NTX.
 
 * Hypercalciuria (high calcium in urine): When bone breaks down, stored calcium is released into the bloodstream and then filtered out by the kidneys into the urine. This increases the risk of kidney stones, which can cause severe pain (renal colic), blood in the urine (hematuria), infection that may lead to a life-threatening response in which the immune system damages the body's own organs (sepsis), and swelling of the kidney due to a build-up of urine (hydronephrosis), which can lead to kidney problems.
 
@@ -50,3 +50,9 @@ Type I collagen makes up most of organic bone. When osteoclasts break down bone,
 > 2. NASA (n.d.) Risk of Spaceflight-Induced Bone Changes. Available at: https://www.nasa.gov/reference/risk-of-spaceflight-induced-bone-changes/ (Accessed: 15 November 2026).
 > 3. Sibonga, J. et al. (2019) 'Resistive exercise in astronauts on prolonged spaceflights provides partial protection against spaceflight-induced bone loss', Bone, 128, 112037. doi: 10.1016/j.bone.2019.07.013.
 > 4. Smith, S.M. et al. (1998) 'Collagen cross-link excretion during space flight and bed rest', Journal of Clinical Endocrinology & Metabolism, 83(10), pp. 3584–3591.
+> 5. https://www.uclahealth.org/medical-services/surgery/endocrine-surgery/patient-resources/patient-education/endocrine-surgery-encyclopedia/urine-calcium-test
+> 6. https://emedicine.medscape.com/article/2093845-overview
+> 7. https://www.mayocliniclabs.com/api/sitecore/TestCatalog/DownloadTestCatalog?testId=83175
+> 8. https://ltd.aruplab.com/Tests/Pub/0070062
+> 9. https://pathlabs.rlbuht.nhs.uk/fpyr.pdf
+> 10. https://medicaljournalssweden.se/actaoncologica/article/download/27397/32200/80278
